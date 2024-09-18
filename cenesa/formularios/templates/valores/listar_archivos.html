@@ -1,41 +1,47 @@
-<!-- templates/Valores/listar_archivos.html -->
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Archivos Excel Subidos</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Obra Social / ART</th>
-            <th>Archivo</th>
-            <th>Fecha de Carga</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for archivo in archivos %}
-        <tr>
-            <td>{{ archivo.obra_social.nombre }}</td>
-            <td>{{ archivo.archivo.name }}</td>
-            <td>{{ archivo.fecha_carga }}</td>
-            <td>
-                <a href="{{ archivo.archivo.url }}" class="btn btn-info" download>Descargar</a>
-                
-                <a href="{% url 'procesar_excel' archivo.id %}" class="btn btn-warning">
-                    <i class="fas fa-cogs"></i> Procesar
-                </a>
-                
-                <a href="{% url 'exportar_valores_procesados' archivo.id %}" class="btn btn-success">
-                    <i class="fas fa-file-export"></i> Exportar
-                </a>
-                
-                <!-- Botón para eliminar el archivo -->
-                <a href="{% url 'eliminar_archivo_excel' archivo.id %}" class="btn btn-danger"onclick="return confirm('¿Estás seguro de que deseas eliminar este archivo? Esta acción no se puede deshacer.')">
-<i class="fas fa-trash"></i> Eliminar
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container mt-4">
+    <h2 class="text-center">Archivos Excel Subidos</h2>
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Obra Social / ART</th>
+                    <th>Archivo</th>
+                    <th>Fecha de Carga</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for archivo in archivos %}
+                <tr>
+                    <td>{{ archivo.obra_social.nombre }}</td>
+                    <td>{{ archivo.archivo.name }}</td>
+                    <td>{{ archivo.fecha_carga|date:"d M Y" }}</td>
+                    <td>
+                        <a href="{{ archivo.archivo.url }}" class="btn btn-info btn-sm" download>
+                            <i class="fas fa-download"></i> Descargar
+                        </a>
+
+                        <a href="{% url 'procesar_excel' archivo.id %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-cogs"></i> Procesar
+                        </a>
+
+                        <a href="{% url 'exportar_valores_procesados' archivo.id %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-file-export"></i> Exportar
+                        </a>
+
+                        <!-- Botón para eliminar el archivo con confirmación -->
+                        <a href="{% url 'eliminar_archivo_excel' archivo.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este archivo? Esta acción no se puede deshacer.')">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
