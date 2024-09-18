@@ -1,0 +1,21 @@
+<!-- templates/solicitar/solicitar_autorizacion.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Solicitar Autorización</h2>
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="formulario_id">Selecciona un formulario:</label>
+        <select name="formulario_id" class="form-control" required>
+            {% for formulario in formularios %}
+                <option value="{{ formulario.id }}">{{ formulario.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Descargar PDF</button>
+</form>
+
+<p>Después de rellenar el PDF, por favor súbelo <a href="{% url 'subir_pdf_rellenado' %}">aquí</a>.</p>
+{% endblock %}

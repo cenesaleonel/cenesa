@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Detalle del Pedido de Autorización</h2>
+
+<table class="table">
+    <tr>
+        <th>Nombre del Solicitante:</th>
+        <td>{{ pedido.nombre_solicitante }}</td>
+    </tr>
+    <tr>
+        <th>Fecha de Solicitud:</th>
+        <td>{{ pedido.fecha_solicitud }}</td>
+    </tr>
+    <tr>
+        <th>Comentarios:</th>
+        <td>{{ pedido.comentarios }}</td>
+    </tr>
+    <tr>
+        <th>Estado:</th>
+        <td>{{ pedido.get_estado_display }}</td>
+    </tr>
+    <tr>
+        <th>PDF Subido:</th>
+        <td>
+            {% if pedido.pdf_solicitud %}
+                <a href="{{ pedido.pdf_solicitud.url }}" target="_blank">Ver PDF</a>
+            {% else %}
+                No se ha subido ningún PDF
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
+<a href="{% url 'listar_pedidos_autorizacion' %}" class="btn btn-primary">Volver a la Lista de Pedidos</a>
+
+{% endblock %}

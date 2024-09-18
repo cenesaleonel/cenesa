@@ -3,8 +3,15 @@
 {% block title %}Inicio - CENESA{% endblock %}
 
 {% block content %}
-    <div class="container">
+    <div class="container mt-4">
         <h1>Bienvenidos al sistema de solicitud de CENESA</h1>
         <h3>Hola, {{ user.first_name }} {{ user.last_name }}</h3>
+
+        <!-- Enlace para redirigir a la página de solicitar autorización -->
+        <a href="{% url 'solicitar_autorizacion' %}" class="btn btn-primary mt-3">
+            Solicitar Autorización
+        </a>
     </div>
 {% endblock %}
+
+

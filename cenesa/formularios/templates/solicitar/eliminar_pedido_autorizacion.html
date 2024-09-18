@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Eliminar Pedido de Autorización</h2>
+    <p>¿Estás seguro de que deseas eliminar este pedido de autorización?</p>
+    <p><strong>{{ pedido.nombre_solicitante }}</strong> - Fecha de Solicitud: {{ pedido.fecha_solicitud }}</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <a href="{% url 'listar_pedidos_autorizacion' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

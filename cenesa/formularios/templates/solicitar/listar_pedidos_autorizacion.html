@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Listar Pedidos de Autorización{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1>Pedidos de Autorización</h1>
+        {% if pedidos %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Solicitante</th>
+                    <th>Fecha de Solicitud</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                <tr>
+                    <td>{{ pedido.nombre_solicitante }}</td>
+                    <td>{{ pedido.fecha_solicitud }}</td>
+                    <td>{{ pedido.estado }}</td>
+                    <td>
+                        <a href="{% url 'ver_pedido_autorizacion' pedido.id %}" class="btn btn-info">Ver Solicitud</a>
+                        {% if pedido.estado == 'pendiente' %}
+                        <a href="{% url 'aprobar_pedido_autorizacion' pedido.id %}" class="btn btn-success">Aprobar</a>
+                        <a href="{% url 'rechazar_pedido_autorizacion' pedido.id %}" class="btn btn-danger">Rechazar</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning">No hay pedidos de autorización.</div>
+        {% endif %}
+    </div>
+{% endblock %}

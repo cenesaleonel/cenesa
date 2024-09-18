@@ -1,5 +1,9 @@
 from django.db import models
 import os
+from PyPDF2 import PdfReader, PdfWriter
+from django.conf import settings
+from django.contrib.auth.models import User
+
 
 class Formulario(models.Model):
     nombre = models.CharField(max_length=255)
@@ -26,3 +30,25 @@ class Campo(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
+
+class PedidoAutorizacion(models.Model):
+    SOLICITUD_PENDIENTE = 'pendiente'
+    SOLICITUD_APROBADA = 'aprobada'
+    SOLICITUD_RECHAZADA = 'rechazada'
+    ESTADO_CHOICES = [
+        (SOLICITUD_PENDIENTE, 'Pendiente'),
+        (SOLICITUD_APROBADA, 'Aprobada'),
+        (SOLICITUD_RECHAZADA, 'Rechazada'),
+    ]
+    
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)# Vincula con el usuario autenticado
+    nombre_solicitante = models.CharField(max_length=255)
+    fecha_solicitud = models.DateTimeField(auto_now_add=True)
+    pdf_solicitud = models.FileField(upload_to='pdf/solicitudes/')
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default=SOLICITUD_PENDIENTE)
+    comentarios = models.TextField(blank=True, null=True)
+    
+    def __str__(self):
+        return f'{self.nombre_solicitante} - {self.fecha_solicitud}'
