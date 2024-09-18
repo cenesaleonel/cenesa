@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+
+{% block title %}Crear Formulario{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <h1 class="text-center mb-4">Crear Formulario</h1>
+                <form method="post" enctype="multipart/form-data" class="border p-4 shadow-sm rounded" id="formulario-form">
+                    {% csrf_token %}
+                    
+                    <!-- Campo Nombre -->
+                    <div class="mb-3">
+                        <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label }}</label>
+                        {{ form.nombre|add_class:"form-control" }}
+                    </div>
+
+                    <!-- Campo Descripción -->
+                    <div class="mb-3">
+                        <label for="{{ form.descripcion.id_for_label }}" class="form-label">{{ form.descripcion.label }}</label>
+                        {{ form.descripcion|add_class:"form-control" }}
+                    </div>
+
+                    <!-- Campo PDF -->
+                    <div class="mb-3">
+                        <label for="{{ form.pdf.id_for_label }}" class="form-label">{{ form.pdf.label }}</label>
+                        {{ form.pdf|add_class:"form-control" }}  <!-- Agregar un id -->
+                        <div class="invalid-feedback" id="error-pdf" style="display:none;">
+                            Solo se permiten archivos PDF.
+                        </div>
+                    </div>
+
+                    <!-- Botón Guardar -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('formulario-form').addEventListener('submit', function(event) {
+            const pdfInput = document.getElementById('{{ form.pdf.id_for_label }}');
+            const file = pdfInput.files[0];
+
+            // Verifica si se cargó un archivo
+            if (!file) {
+                alert('Debe cargar un archivo PDF.');
+                event.preventDefault();
+                return;
+            }
+
+            // Verifica si el archivo es un PDF
+            if (file.type !== 'application/pdf') {
+                document.getElementById('error-pdf').style.display = 'block';
+                event.preventDefault();  // Evita el envío del formulario si el archivo no es PDF
+                return;
+            } else {
+                document.getElementById('error-pdf').style.display = 'none';  // Oculta el mensaje si todo está bien
+            }
+        });
+    </script>
+{% endblock %}

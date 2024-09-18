@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Formulario{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Eliminar Formulario</h1>
+        <p class="text-center">¿Estás seguro de que deseas eliminar el formulario <strong>{{ formulario.nombre }}</strong> y su archivo PDF?</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-danger me-2">Eliminar</button>
+                <a href="{% url 'listar_formularios' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

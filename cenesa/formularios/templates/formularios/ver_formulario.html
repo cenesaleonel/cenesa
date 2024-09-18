@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Ver Formulario{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1>{{ formulario.nombre }}</h1>
+        <p>{{ formulario.descripcion }}</p>
+        <embed src="{{ formulario.pdf.url }}" width="100%" height="600px" type="application/pdf">
+            <p>URL del PDF: {{ formulario.pdf.url }}</p>
+
+
+    </div>
+{% endblock %}

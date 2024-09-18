@@ -1,9 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Formulario, Campo
-from .forms import FormularioForm, CampoFormSet
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm 
+from .models import Formulario
+from .forms import FormularioForm
+
 
 # Vista Home
 @login_required
@@ -23,24 +24,28 @@ def listar_usuarios(request):
 @login_required
 def crear_formulario(request):
     if request.method == 'POST':
-        form = FormularioForm(request.POST)
-        campo_formset = CampoFormSet(request.POST)
-        if form.is_valid() and campo_formset.is_valid():
-            formulario = form.save()
-            campos = campo_formset.save(commit=False)
-            for campo in campos:
-                campo.formulario = formulario
-                campo.save()
+        form = FormularioForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
             return redirect('listar_formularios')
     else:
         form = FormularioForm()
-        campo_formset = CampoFormSet()
-    return render(request, 'formularios/crear_formulario.html', {'form': form, 'campo_formset': campo_formset})
+    return render(request, 'formularios/crear_formulario.html', {'form': form})
 
 @login_required
-def rellenar_formulario(request, id):
-    formulario = Formulario.objects.get(id=id)
+def listar_formularios(request):
+    formularios = Formulario.objects.all()
+    return render(request, 'formularios/listar_formularios.html', {'formularios': formularios})
+
+@login_required
+def ver_formulario(request, id):
+    formulario = get_object_or_404(Formulario, id=id)
+    return render(request, 'formularios/ver_formulario.html', {'formulario': formulario})
+
+@login_required
+def eliminar_formulario(request, id):
+    formulario = get_object_or_404(Formulario, id=id)
     if request.method == 'POST':
-        # Guardar la información rellenada
-        pass
-    return render(request, 'formularios/rellenar_formulario.html', {'formulario': formulario})
+        formulario.delete()
+        return redirect('listar_formularios')
+    return render(request, 'formularios/eliminar_formulario.html', {'formulario': formulario})

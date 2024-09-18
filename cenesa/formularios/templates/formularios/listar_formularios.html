@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Listar Formularios{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Formularios Disponibles</h1>
+
+        <!-- Botón para crear un nuevo formulario -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="{% url 'crear_formulario' %}" class="btn btn-success">
+                <i class="fas fa-plus-circle"></i> Crear Formulario
+            </a>
+        </div>
+
+        {% if formularios %}
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Fecha de Creación</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for formulario in formularios %}
+                    <tr>
+                        <td>{{ formulario.nombre }}</td>
+                        <td>{{ formulario.descripcion }}</td>
+                        <td>{{ formulario.fecha_creacion }}</td>
+                        <td class="text-center">
+                            <a href="{% url 'ver_formulario' formulario.id %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i> Ver PDF
+                            </a>
+                            <a href="{% url 'eliminar_formulario' formulario.id %}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </a>
+                        </td>
+                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning text-center">
+            <i class="fas fa-exclamation-circle"></i> No existen formularios disponibles.
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}
