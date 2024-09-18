@@ -33,14 +33,13 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/admin/">Admin</a>
                         </li>
-                        {% endif %}
-                        
                         <li class="nav-item"></li>
                             <a class="nav-link" href="{% url 'listar_formularios' %}">Formularios</a>
                         </li>
                         <li class="nav-item"></li>
                             <a class="nav-link" href="{% url 'listar_pedidos_autorizacion' %}">Autorizaciones</a>
                         </li>
+                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'logout' %}">Cerrar Sesión</a>
                         </li>

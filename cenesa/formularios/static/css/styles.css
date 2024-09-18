@@ -216,3 +216,40 @@ header nav ul li a:hover {
 .table-card:hover {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
+
+
+footer.footer {
+    background-color: #343a40; /* Fondo oscuro */
+    color: #fff; /* Texto blanco */
+    padding: 20px;
+}
+
+footer.footer a {
+    color: #17a2b8; /* Azul claro para el enlace */
+    text-decoration: none;
+}
+
+footer.footer a:hover {
+    color: #0d6efd; /* Azul más fuerte al pasar el mouse */
+    text-decoration: underline;
+}
+
+html, body {
+    height: 100%;
+}
+
+footer.footer {
+    background-color: #343a40;
+    color: #fff;
+    padding: 20px;
+}
+
+footer.footer a {
+    color: #17a2b8;
+    text-decoration: none;
+}
+
+footer.footer a:hover {
+    color: #0d6efd;
+    text-decoration: underline;
+}

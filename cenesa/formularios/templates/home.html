@@ -8,10 +8,15 @@
         <h3>Hola, {{ user.first_name }} {{ user.last_name }}</h3>
 
         <!-- Enlace para redirigir a la página de solicitar autorización -->
-        <a href="{% url 'solicitar_autorizacion' %}" class="btn btn-primary mt-3">
-            Solicitar Autorización
-        </a>
-    </div>
+        <a href="{% url 'solicitar_autorizacion' %}" class="btn btn-primary mt-3">Solicitar Autorización</a>
+        
+        <!-- Enlace para listar los pedidos de autorización -->
+        <a href="{% url 'listar_pedidos_autorizacion' %}" class="btn btn-secondary mt-3">Listado de Autorizaciones</a>
+    </div>  
+
+    <footer class="footer mt-5 text-center bg-dark text-white py-3">
+        <p>Derechos reservados CENESA S.A - Desarrollado por 
+            <a href="https://www.instagram.com/leonelpescador/?igsh=MXVxa21kbWV4a3k2ag%3D%3D" target="_blank" class="text-info">Pescador Leonel</a>
+        </p>
+    </footer>
 {% endblock %}
-
-

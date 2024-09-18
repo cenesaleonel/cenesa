@@ -7,7 +7,7 @@ from django.http import FileResponse
 from .models import Formulario, PedidoAutorizacion
 from .forms import FormularioForm, PedidoAutorizacionForm
 import os
-
+from django.contrib.admin.views.decorators import staff_member_required
 # Vista Home
 @login_required
 def home(request):
@@ -88,17 +88,24 @@ def subir_pdf_rellenado(request):
         form = PedidoAutorizacionForm()
     return render(request, 'solicitar/subir_pdf_rellenado.html', {'form': form})
 
+
 @login_required
 def listar_pedidos_autorizacion(request):
-    pedidos = PedidoAutorizacion.objects.filter(usuario=request.user)  # Mostrar solo los pedidos del usuario actual
+    # Si el usuario es staff, muestra todos los pedidos, de lo contrario, solo los del usuario actual
+    if request.user.is_staff:
+        pedidos = PedidoAutorizacion.objects.all()  # Mostrar todos los pedidos
+    else:
+        pedidos = PedidoAutorizacion.objects.filter(usuario=request.user)  # Mostrar solo los pedidos del usuario actual
+
     return render(request, 'solicitar/listar_pedidos_autorizacion.html', {'pedidos': pedidos})
+
 
 @login_required
 def ver_pedido_autorizacion(request, id):
     pedido = get_object_or_404(PedidoAutorizacion, id=id, usuario=request.user)
     return render(request, 'solicitar/ver_pedido_autorizacion.html', {'pedido': pedido})
 
-from django.contrib.admin.views.decorators import staff_member_required
+
 
 @login_required
 @staff_member_required
