@@ -1,5 +1,6 @@
 from django import forms
 from .models import PedidoAutorizacion, Formulario
+from .models import ObraSocial
 
 class FormularioForm(forms.ModelForm):
     class Meta:
@@ -29,3 +30,28 @@ class FormularioDeEdicion(forms.Form):
     nombre = forms.CharField(label='Nombre', max_length=100)
     fecha = forms.DateField(label='Fecha')
     comentarios = forms.CharField(widget=forms.Textarea, required=False)
+
+
+
+from .models import ArchivoExcel
+
+class ExcelUploadForm(forms.ModelForm):
+    class Meta:
+        model = ArchivoExcel
+        fields = ['obra_social', 'archivo']
+        widgets = {
+            'obra_social': forms.Select(attrs={'class': 'form-control'}),
+            'archivo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+
+
+
+class ObraSocialForm(forms.ModelForm):
+    class Meta:
+        model = ObraSocial
+        fields = ['nombre', 'codigo']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de la Obra Social'}),
+            'codigo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código'}),
+        }

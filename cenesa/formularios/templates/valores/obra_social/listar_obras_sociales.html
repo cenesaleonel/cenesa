@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Obras Sociales</h2>
+<a href="{% url 'crear_obra_social' %}" class="btn btn-success mb-3">Crear Nueva Obra Social</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Código</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obra_social in obras_sociales %}
+        <tr>
+            <td>{{ obra_social.nombre }}</td>
+            <td>{{ obra_social.codigo }}</td>
+            <td>
+                <a href="{% url 'editar_obra_social' obra_social.id %}" class="btn btn-primary">Editar</a>
+                <a href="{% url 'eliminar_obra_social' obra_social.id %}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta obra social?')">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

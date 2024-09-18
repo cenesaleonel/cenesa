@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Eliminar Obra Social</h2>
+<p>¿Estás seguro de que deseas eliminar la obra social <strong>{{ obra_social.nombre }}</strong>?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a href="{% url 'listar_obras_sociales' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

@@ -52,3 +52,21 @@ class PedidoAutorizacion(models.Model):
     
     def __str__(self):
         return f'{self.nombre_solicitante} - {self.fecha_solicitud}'
+
+
+#Para los valores 
+class ObraSocial(models.Model):
+    nombre = models.CharField(max_length=255)
+    codigo = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.nombre
+
+# carga de excel
+class ArchivoExcel(models.Model):
+    obra_social = models.ForeignKey(ObraSocial, on_delete=models.CASCADE, related_name="archivos")
+    archivo = models.FileField(upload_to='media/excel')
+    fecha_carga = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Archivo {self.archivo.name} - {self.obra_social.nombre} ({self.fecha_carga})"

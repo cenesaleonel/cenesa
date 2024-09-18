@@ -16,7 +16,16 @@ urlpatterns = [
     path('subir/', views.subir_pdf_rellenado, name='subir_pdf_rellenado'),
     path('pedido/eliminar/<int:id>/', views.eliminar_pedido_autorizacion, name='eliminar_pedido_autorizacion'),
 
+    path('subir-excel/', views.subir_excel, name='subir_excel'),
+    path('listar-archivos/', views.listar_archivos, name='listar_archivos'),
+    path('exportar-valores-procesados/<int:id>/', views.exportar_valores_procesados, name='exportar_valores_procesados'),
+    path('procesar-excel/<int:id>/', views.procesar_excel, name='procesar_excel'),
+    path('eliminar-archivo/<int:id>/', views.eliminar_archivo_excel, name='eliminar_archivo_excel'),
     
     
+    path('obras-sociales/', views.listar_obras_sociales, name='listar_obras_sociales'),
+    path('obras-sociales/crear/', views.crear_obra_social, name='crear_obra_social'),
+    path('obras-sociales/editar/<int:id>/', views.editar_obra_social, name='editar_obra_social'),
+    path('obras-sociales/eliminar/<int:id>/', views.eliminar_obra_social, name='eliminar_obra_social'),
     
 ]
