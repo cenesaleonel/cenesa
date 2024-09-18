@@ -7,6 +7,9 @@ urlpatterns = [
     path('formularios/', views.listar_formularios, name='listar_formularios'),
     path('<int:id>/ver/', views.ver_formulario, name='ver_formulario'),
     path('formularios/eliminar/<int:id>/', views.eliminar_formulario, name='eliminar_formulario'),
+    path('crear-novedad/', views.crear_novedad, name='crear_novedad'),
+    path('editar-novedad/<int:id>/', views.editar_novedad, name='editar_novedad'),
+    path('eliminar-novedad/<int:id>/', views.eliminar_novedad, name='eliminar_novedad'),
     
     path('solicitar/', views.solicitar_autorizacion, name='solicitar_autorizacion'),
     path('pedidos/', views.listar_pedidos_autorizacion, name='listar_pedidos_autorizacion'),

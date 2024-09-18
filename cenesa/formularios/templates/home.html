@@ -3,14 +3,46 @@
 {% block title %}Inicio - CENESA{% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
-        <h1>Bienvenidos al sistema de solicitudes de CENESA</h1>
-        <h3>Hola {{ user.first_name }} {{ user.last_name }}</h3>
+<div class="container mt-4">
+    <h1>Bienvenidos al sistema de solicitudes de CENESA</h1>
+    <h3>Hola {{ user.first_name }} {{ user.last_name }}</h3>
 
-        <!-- Enlace para redirigir a la página de solicitar autorización -->
-        <a href="{% url 'solicitar_autorizacion' %}" class="btn btn-primary mt-3">Solicitar Autorización</a>
-        
-        <!-- Enlace para listar los pedidos de autorización -->
-        <a href="{% url 'listar_pedidos_autorizacion' %}" class="btn btn-secondary mt-3">Listado de Autorizaciones</a>
-    </div>  
+    <!-- Enlaces para solicitar autorización y listar autorizaciones -->
+    <div class="d-flex justify-content-start my-4">
+        <a href="{% url 'solicitar_autorizacion' %}" class="btn btn-primary me-3">Solicitar Autorización</a>
+        <a href="{% url 'listar_pedidos_autorizacion' %}" class="btn btn-secondary">Listado de Autorizaciones</a>
+    </div>
+
+    <!-- Título de las novedades -->
+    <h3 class="my-4">Últimas Novedades</h3>
+
+    <!-- Sección de novedades -->
+    {% if novedades %}
+        <div class="row">
+            {% for novedad in novedades %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ novedad.titulo }}</h5>
+                        <p class="card-text">{{ novedad.contenido|truncatewords:20 }}</p>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">Publicado el {{ novedad.fecha_publicacion|date:"d M Y" }}</small>
+                        
+                        <!-- Botones de acciones (Editar/Eliminar) para usuarios con permisos -->
+                        {% if request.user.is_authenticated and request.user.is_staff %}
+                        <div class="d-flex justify-content-between mt-2">
+                            <a href="{% url 'editar_novedad' novedad.id %}" class="btn btn-warning btn-sm">Editar</a>
+                            <a href="{% url 'eliminar_novedad' novedad.id %}" class="btn btn-danger btn-sm"onclick="return confirm('¿Estás seguro de que deseas eliminar esta novedad?')">Eliminar</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">No hay novedades disponibles en este momento.</div>
+    {% endif %}
+</div>
 {% endblock %}

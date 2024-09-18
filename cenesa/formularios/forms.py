@@ -1,5 +1,5 @@
 from django import forms
-from .models import PedidoAutorizacion, Formulario
+from .models import PedidoAutorizacion, Formulario ,  Novedad
 from .models import ObraSocial
 
 class FormularioForm(forms.ModelForm):
@@ -55,3 +55,14 @@ class ObraSocialForm(forms.ModelForm):
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de la Obra Social'}),
             'codigo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código'}),
         }
+        
+class NovedadForm(forms.ModelForm):
+    class Meta:
+        model = Novedad
+        fields = ['titulo', 'contenido']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título de la novedad'}),
+            'contenido': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Contenido de la novedad'}),
+        }        
+
+        

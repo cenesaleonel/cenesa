@@ -70,3 +70,13 @@ class ArchivoExcel(models.Model):
 
     def __str__(self):
         return f"Archivo {self.archivo.name} - {self.obra_social.nombre} ({self.fecha_carga})"
+    
+
+class Novedad(models.Model):
+    titulo = models.CharField(max_length=255)
+    contenido = models.TextField()
+    fecha_publicacion = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.titulo
+    

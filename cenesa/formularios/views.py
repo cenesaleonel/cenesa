@@ -14,13 +14,26 @@ from .models import ArchivoExcel
 from django.contrib import messages
 from .models import ObraSocial
 from .forms import ObraSocialForm
-
+from .models import Novedad
+from .forms import NovedadForm
 
 
 # Vista Home
 @login_required
 def home(request):
-    return render(request, 'home.html')
+    novedades = Novedad.objects.all().order_by('-fecha_publicacion')[:5]  # Mostrar las últimas 5 novedades
+    return render(request, 'home.html', {'novedades': novedades})
+
+@login_required
+def crear_novedad(request):
+    if request.method == 'POST':
+        form = NovedadForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')  # Redirige al home donde se mostrarán las novedades
+    else:
+        form = NovedadForm()
+    return render(request, 'novedades/crear_novedad.html', {'form': form})
 
 # Vista para listar usuarios
 @login_required
@@ -251,6 +264,8 @@ from django.http import HttpResponse
 from .models import ArchivoExcel
 from django.contrib import messages
 
+@login_required
+@staff_member_required
 def procesar_excel(request, id):
     archivo = get_object_or_404(ArchivoExcel, id=id)
 
@@ -294,14 +309,14 @@ def procesar_excel(request, id):
         return redirect('listar_archivos')
 
 
-# views.py
 
 import pandas as pd
 from django.http import HttpResponse
 from .models import ArchivoExcel
 from django.shortcuts import get_object_or_404
 from io import BytesIO
-
+@login_required
+@staff_member_required
 def exportar_valores_procesados(request, id):
     archivo = get_object_or_404(ArchivoExcel, id=id)
 
@@ -349,3 +364,32 @@ def exportar_valores_procesados(request, id):
     else:
         # Si el archivo no es un Excel, se puede redirigir o mostrar un error
         return HttpResponse("El archivo no es un Excel válido.")
+
+
+
+
+
+# Editar una novedad
+@login_required
+@staff_member_required
+def editar_novedad(request, id):
+    novedad = get_object_or_404(Novedad, id=id)
+    if request.method == 'POST':
+        form = NovedadForm(request.POST, instance=novedad)
+        if form.is_valid():
+            form.save()
+            return redirect('home')  # Redirige al home
+    else:
+        form = NovedadForm(instance=novedad)
+    return render(request, 'novedades/editar_novedad.html', {'form': form, 'novedad': novedad})
+
+
+# Eliminar una novedad
+@login_required
+@staff_member_required
+def eliminar_novedad(request, id):
+    novedad = get_object_or_404(Novedad, id=id)
+    if request.method == 'POST':
+        novedad.delete()
+        return redirect('home')
+    return render(request, 'novedades/eliminar_novedad.html', {'novedad': novedad})
