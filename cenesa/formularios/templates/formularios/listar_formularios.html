@@ -29,16 +29,15 @@
                     <tr>
                         <td>{{ formulario.nombre }}</td>
                         <td>{{ formulario.descripcion }}</td>
-                        <td>{{ formulario.fecha_creacion }}</td>
+                        <td>{{ formulario.fecha_creacion|date:"d M Y" }}</td>
                         <td class="text-center">
-                            <a href="{% url 'ver_formulario' formulario.id %}" class="btn btn-info btn-sm">
+                            
+                            <a href="{{ formulario.pdf.url }}" target="_blank" class="btn btn-info btn-sm">
                                 <i class="fas fa-eye"></i> Ver PDF
                             </a>
-                            <a href="{% url 'eliminar_formulario' formulario.id %}" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </a>
+                            
+                            <a href="{% url 'eliminar_formulario' formulario.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este formulario? Esta acción no se puede deshacer.')"><i class="fas fa-trash"></i> Eliminar</a>
                         </td>
-                        
                     </tr>
                     {% endfor %}
                 </tbody>

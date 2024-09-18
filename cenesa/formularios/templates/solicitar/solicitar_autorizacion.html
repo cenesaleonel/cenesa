@@ -1,21 +1,30 @@
-<!-- templates/solicitar/solicitar_autorizacion.html -->
-
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Solicitar Autorización</h2>
-<form method="post">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="formulario_id">Selecciona un formulario:</label>
-        <select name="formulario_id" class="form-control" required>
-            {% for formulario in formularios %}
-                <option value="{{ formulario.id }}">{{ formulario.nombre }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Descargar PDF</button>
-</form>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Solicitar Autorización</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <form method="post" class="shadow p-4 rounded bg-light">
+                {% csrf_token %}
+                <div class="form-group mb-3">
+                    <label for="formulario_id" class="form-label">Selecciona un formulario:</label>
+                    <select name="formulario_id" class="form-control form-select" required>
+                        <option value="" disabled selected>-- Selecciona un formulario --</option>
+                        {% for formulario in formularios %}
+                            <option value="{{ formulario.id }}">{{ formulario.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">Descargar PDF</button>
+                </div>
+            </form>
 
-<p>Después de rellenar el PDF, por favor súbelo <a href="{% url 'subir_pdf_rellenado' %}">aquí</a>.</p>
+            <div class="text-center mt-4">
+                <p>Después de rellenar el PDF, por favor súbelo <a href="{% url 'subir_pdf_rellenado' %}" class="text-decoration-none text-info">aquí</a>.</p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
