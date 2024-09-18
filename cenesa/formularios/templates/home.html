@@ -1,58 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio - CENESA</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-        }
+{% extends 'base.html' %}
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            margin-top: 50px;
-            text-align: center;
-        }
+{% block title %}Inicio - CENESA{% endblock %}
 
-        h1 {
-            color: #333;
-        }
-
-        p {
-            color: #666;
-            font-size: 18px;
-        }
-
-        .logout-button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #333;
-            color: #fff;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 18px;
-            margin-top: 20px;
-        }
-
-        .logout-button:hover {
-            background-color: #ff9800;
-        }
-    </style>
-</head>
-<body>
+{% block content %}
     <div class="container">
-        <h1>CENESA</h1>
-        <p>Hola </p>
-
+        <h1>Bienvenidos al sistema de solicitud de CENESA</h1>
+        <h3>Hola, {{ user.first_name }} {{ user.last_name }}</h3>
     </div>
-</body>
-</html>
+{% endblock %}

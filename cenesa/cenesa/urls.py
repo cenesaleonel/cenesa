@@ -20,8 +20,8 @@ from django.contrib.auth import views as auth_views
 from formularios import views 
 
 urlpatterns = [
+    path('', include('formularios.urls')),
     path('admin/', admin.site.urls),  
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),  # Ruta para login
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),  # Ruta para logout
-    path('', views.home, name='home'),  
 ]
