@@ -253,3 +253,41 @@ footer.footer a:hover {
     color: #0d6efd;
     text-decoration: underline;
 }
+
+.table-excel {
+    border: 1px solid #ddd;
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+}
+
+.table-excel th, .table-excel td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.table-excel th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.table-excel input {
+    border: none;
+    background-color: transparent;
+    width: 100%;
+    text-align: center;
+}
+
+.table-excel input:focus {
+    outline: none;
+    background-color: #e9ecef;
+}
+
+button.btn-primary {
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+}
+
+button.btn-primary:hover {
+    background-color: #45a049;
+}

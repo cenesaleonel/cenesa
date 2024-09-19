@@ -65,4 +65,23 @@ class NovedadForm(forms.ModelForm):
             'contenido': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Contenido de la novedad'}),
         }        
 
-        
+
+
+from django import forms
+from .models import Stock
+
+class UploadStockForm(forms.Form):
+    archivo_excel = forms.FileField()
+
+class StockForm(forms.ModelForm):
+    class Meta:
+        model = Stock
+        fields = ['codigo', 'descripcion', 'deposito', 'tipo_elemento', 'cantidad']
+        widgets = {
+            'codigo': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
+            'deposito': forms.TextInput(attrs={'class': 'form-control'}),
+            'tipo_elemento': forms.TextInput(attrs={'class': 'form-control'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+    

@@ -31,4 +31,10 @@ urlpatterns = [
     path('obras-sociales/editar/<int:id>/', views.editar_obra_social, name='editar_obra_social'),
     path('obras-sociales/eliminar/<int:id>/', views.eliminar_obra_social, name='eliminar_obra_social'),
     
+    path('carga-masiva/', views.carga_masiva_stock, name='carga_masiva_stock'),
+    path('listar-stock/', views.listar_stock, name='listar_stock'),
+    path('agregar-producto/', views.agregar_producto, name='agregar_producto'),
+    path('editar-producto/<str:codigo>/', views.editar_producto, name='editar_producto'),
+    path('eliminar-producto/<str:codigo>/', views.eliminar_producto, name='eliminar_producto'),
+    
 ]

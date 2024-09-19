@@ -393,3 +393,131 @@ def eliminar_novedad(request, id):
         novedad.delete()
         return redirect('home')
     return render(request, 'novedades/eliminar_novedad.html', {'novedad': novedad})
+
+
+
+ #Farmacia
+
+
+import pandas as pd
+from django.contrib import messages
+from .models import Stock
+from .forms import UploadStockForm, StockForm
+
+
+def carga_masiva_stock(request):
+    if request.method == 'POST':
+        form = UploadStockForm(request.POST, request.FILES)
+        if form.is_valid():
+            archivo = request.FILES['archivo_excel']
+            
+            # Validar que el archivo sea .xlsx
+            if not archivo.name.endswith('.xlsx'):
+                messages.error(request, 'El archivo debe estar en formato Excel (.xlsx).')
+                return redirect('carga_masiva_stock')
+
+            try:
+                df = pd.read_excel(archivo)
+
+                # Verificar que las columnas requeridas existan
+                required_columns = ['Codigo', 'Descripccion', 'Deposito', 'Tipo de elementos', 'Cantidad']
+                for col in required_columns:
+                    if col not in df.columns:
+                        messages.error(request, f"Falta la columna requerida: {col}")
+                        return redirect('carga_masiva_stock')
+                
+                # Validar que la columna "Cantidad" sea numérica y no tenga valores nulos
+                if df['Cantidad'].isnull().any() or not pd.api.types.is_numeric_dtype(df['Cantidad']):
+                    messages.error(request, 'La columna "Cantidad" debe contener valores numéricos y no estar vacía.')
+                    return redirect('carga_masiva_stock')
+
+                # Verificar que no haya códigos duplicados en el archivo
+                if df['Codigo'].duplicated().any():
+                    messages.error(request, 'El archivo contiene códigos de productos duplicados.')
+                    return redirect('carga_masiva_stock')
+
+                # Si pasa todas las validaciones, actualizar o crear el stock
+                for _, row in df.iterrows():
+                    Stock.objects.update_or_create(
+                        codigo=row['Codigo'],
+                        defaults={
+                            'descripcion': row['Descripccion'],
+                            'deposito': row['Deposito'],
+                            'tipo_elemento': row['Tipo de elementos'],
+                            'cantidad': row['Cantidad'],
+                        }
+                    )
+
+                messages.success(request, 'El archivo se cargó correctamente.')
+                return redirect('listar_stock')
+
+            except Exception as e:
+                messages.error(request, f'Ocurrió un error al procesar el archivo: {e}')
+                return redirect('carga_masiva_stock')
+    else:
+        form = UploadStockForm()
+    return render(request, 'farmacia/carga_masiva_stock.html', {'form': form})
+
+
+from django.db.models import Q
+
+def listar_stock(request):
+    # Obtener los valores del filtro desde el request GET
+    filtro_codigo = request.GET.get('codigo', '')
+    filtro_descripcion = request.GET.get('descripcion', '')
+    filtro_deposito = request.GET.get('deposito', '')
+    filtro_tipo = request.GET.get('tipo', '')
+
+    # Filtrar los productos usando los valores de los filtros
+    stock_items = Stock.objects.all()
+    
+    if filtro_codigo:
+        stock_items = stock_items.filter(codigo__icontains=filtro_codigo)
+    if filtro_descripcion:
+        stock_items = stock_items.filter(descripcion__icontains=filtro_descripcion)
+    if filtro_deposito:
+        stock_items = stock_items.filter(deposito__icontains=filtro_deposito)
+    if filtro_tipo:
+        stock_items = stock_items.filter(tipo_elemento__icontains=filtro_tipo)
+
+    return render(request, 'farmacia/listar_stock.html', {
+        'stock_items': stock_items,
+        'filtro_codigo': filtro_codigo,
+        'filtro_descripcion': filtro_descripcion,
+        'filtro_deposito': filtro_deposito,
+        'filtro_tipo': filtro_tipo
+    })
+
+
+# Vista para agregar un nuevo producto
+def agregar_producto(request):
+    if request.method == 'POST':
+        form = StockForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('listar_stock')
+    else:
+        form = StockForm()
+    return render(request, 'farmacia/agregar_producto.html', {'form': form})
+
+
+# Vista para editar un producto existente
+def editar_producto(request, codigo):
+    producto = get_object_or_404(Stock, codigo=codigo)
+    if request.method == 'POST':
+        form = StockForm(request.POST, instance=producto)
+        if form.is_valid():
+            form.save()
+            return redirect('listar_stock')
+    else:
+        form = StockForm(instance=producto)
+    return render(request, 'farmacia/editar_producto.html', {'form': form})
+
+
+# Vista para eliminar un producto
+def eliminar_producto(request, codigo):
+    producto = get_object_or_404(Stock, codigo=codigo)
+    producto.delete()
+    return redirect('listar_stock')
+
+
