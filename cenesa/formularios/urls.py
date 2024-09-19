@@ -43,5 +43,6 @@ urlpatterns = [
     path('actualizar-inventario/', views.actualizar_inventario, name='actualizar_inventario'),
     path('descargar-inventario/', views.descargar_inventario, name='descargar_inventario'),
     path('descargar-estructura-excel/', views.descargar_estructura_excel, name='descargar_estructura_excel'),
+    path('modificar-stock/<str:codigo>/', views.modificar_stock, name='modificar_stock'),
     
 ]

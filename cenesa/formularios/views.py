@@ -688,3 +688,19 @@ def descargar_estructura_excel(request):
         df.to_excel(writer, index=False)
 
     return response
+
+from django.shortcuts import redirect, get_object_or_404
+from .models import Stock  # Asegúrate de usar el modelo correcto
+
+# Función para modificar el stock
+def modificar_stock(request, codigo):
+    item = get_object_or_404(Stock, codigo=codigo)
+    cantidad = int(request.POST.get('cantidad', 0))  # Obtener la cantidad del formulario
+
+    if request.POST.get('accion') == 'incrementar':
+        item.cantidad += cantidad  # Incrementar el stock
+    elif request.POST.get('accion') == 'decrementar' and item.cantidad >= cantidad:
+        item.cantidad -= cantidad  # Decrementar el stock (solo si es mayor o igual)
+
+    item.save()
+    return redirect('listar_stock')

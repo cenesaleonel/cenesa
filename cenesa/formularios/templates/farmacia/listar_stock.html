@@ -43,6 +43,7 @@
                     <th scope="col">Depósito</th>
                     <th scope="col">Tipo</th>
                     <th scope="col">Cantidad</th>
+                    <th scope="col">Operación</th> 
                     <th scope="col">Acciones</th>
                 </tr>
             </thead>
@@ -54,6 +55,17 @@
                     <td>{{ item.deposito }}</td>
                     <td>{{ item.tipo_elemento }}</td>
                     <td>{{ item.cantidad }}</td>
+                    <td>
+                        <form method="post" action="{% url 'modificar_stock' item.codigo %}">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="number" name="cantidad" class="form-control" placeholder="Cantidad">
+                                <button type="submit" name="accion" value="incrementar" class="btn btn-success">➕</button>
+                                <button type="submit" name="accion" value="decrementar" class="btn btn-danger">➖</button>
+                            </div>
+                        </form>
+                    </td>
+
                     <td>
                         <a href="{% url 'editar_producto' item.codigo %}" class="btn btn-sm btn-warning">Editar</a>
                         <a href="{% url 'eliminar_producto' item.codigo %}" class="btn btn-sm btn-danger">Eliminar</a>
@@ -79,15 +91,12 @@
         </form>
     </div>
 
-
 <!-- Estilos para la animación de la calavera -->
 <style>
- 
     .custom-border {
         border: 2px solid red;
         border-radius: 5px; /* Opcional, para bordes redondeados */
     }
-
 
     .btn-custom-green {
         background-color: #28a745;  /* Verde personalizado */
@@ -115,4 +124,5 @@
         100% { transform: rotate(0deg); }
     }
 </style>
+
 {% endblock %}
