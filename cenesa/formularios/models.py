@@ -93,3 +93,11 @@ class Stock(models.Model):
     def __str__(self):
         return f"{self.descripcion} ({self.cantidad})"
 
+
+
+
+
+class ArchivoExcelSubido(models.Model):
+    archivo = models.FileField(upload_to='archivos_subidos/')
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+

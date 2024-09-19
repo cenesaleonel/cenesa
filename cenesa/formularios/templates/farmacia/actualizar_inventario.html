@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Actualizar Inventario desde Excel</h1>
+
+    <form id="uploadForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-primary">Subir y Actualizar</button>
+        <a href="{% url 'descargar_inventario' %}" class="btn btn-success">Descargar Inventario</a>
+        <a href="{% url 'listar_stock' %}" class="btn btn-primary">Cancelar</a>
+    </form>
+   
+
+    <!-- Contenedor de mensajes de error -->
+    <div id="error-message" class="alert alert-danger mt-3" style="display: none;"></div>
+</div>
+
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+        const fileInput = document.querySelector('input[type="file"]');
+        const errorMessage = document.getElementById('error-message');
+        const allowedExtensions = /(\.xls|\.xlsx)$/i;
+
+        // Limpiar mensaje de error
+        errorMessage.style.display = 'none';
+        errorMessage.innerHTML = '';
+
+        // Verificar si se ha seleccionado un archivo
+        if (!fileInput.value) {
+            event.preventDefault();
+            errorMessage.style.display = 'block';
+            errorMessage.innerHTML = 'Por favor, selecciona un archivo para cargar.';
+            return;
+        }
+
+        // Verificar si el archivo es un Excel
+        if (!allowedExtensions.exec(fileInput.value)) {
+            event.preventDefault();
+            errorMessage.style.display = 'block';
+            errorMessage.innerHTML = 'El archivo seleccionado no es válido. Por favor, selecciona un archivo Excel con extensión .xls o .xlsx.';
+            return;
+        }
+
+        // Si todas las validaciones pasan, permitir el envío del formulario
+    });
+</script>
+{% endblock %}

@@ -2,57 +2,117 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<h1 class="my-4">Lista de Stock</h1>
+<div class="container mt-5">
+    <h1 class="my-4">Lista de Stock</h1>
 
-<form method="get" class="row g-3 mb-4">
-    <div class="col-md-2">
-        <input type="text" name="codigo" value="{{ filtro_codigo }}" class="form-control" placeholder="Código">
+    <!-- Botones para agregar, descargar y borrar stock -->
+    <div class="mb-4">
+        <a href="{% url 'agregar_producto' %}" class="btn btn-custom-green">Agregar individualmente</a>
+        <a href="{% url 'carga_masiva_stock' %}" class="btn btn-custom-green">Agregar Elementos Con Excel</a>
+        <a href="{% url 'actualizar_inventario' %}" class="btn btn-custom-green">Actualizar Inventario</a>
+        <a href="{% url 'descargar_stock' %}" class="btn btn-success">Descargar Stock</a> 
     </div>
-    <div class="col-md-3">
-        <input type="text" name="descripcion" value="{{ filtro_descripcion }}" class="form-control" placeholder="Descripción">
-    </div>
-    <div class="col-md-2">
-        <input type="text" name="deposito" value="{{ filtro_deposito }}" class="form-control" placeholder="Depósito">
-    </div>
-    <div class="col-md-2">
-        <input type="text" name="tipo" value="{{ filtro_tipo }}" class="form-control" placeholder="Tipo de Elemento">
-    </div>
-    <div class="col-md-3">
-        <button type="submit" class="btn btn-primary">Filtrar</button>
-        <a href="{% url 'listar_stock' %}" class="btn btn-secondary">Limpiar</a>
-    </div>
-</form>
 
-<div class="table-responsive">
-    <table class="table-excel">
-        <thead>
-            <tr>
-                <th scope="col">Código</th>
-                <th scope="col">Descripción</th>
-                <th scope="col">Depósito</th>
-                <th scope="col">Tipo</th>
-                <th scope="col">Cantidad</th>
-                <th scope="col">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in stock_items %}
-            <tr>
-                <td>{{ item.codigo }}</td>
-                <td>{{ item.descripcion }}</td>
-                <td>{{ item.deposito }}</td>
-                <td>{{ item.tipo_elemento }}</td>
-                <td>{{ item.cantidad }}</td>
-                <td>
-                    <a href="{% url 'editar_producto' item.codigo %}" class="btn btn-sm btn-warning">Editar</a>
-                    <a href="{% url 'eliminar_producto' item.codigo %}" class="btn btn-sm btn-danger">Eliminar</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Formulario de filtrado -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-2">
+            <input type="text" name="codigo" value="{{ filtro_codigo }}" class="form-control" placeholder="Código">
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="descripcion" value="{{ filtro_descripcion }}" class="form-control" placeholder="Descripción">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="deposito" value="{{ filtro_deposito }}" class="form-control" placeholder="Depósito">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="tipo" value="{{ filtro_tipo }}" class="form-control" placeholder="Tipo de Elemento">
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a href="{% url 'listar_stock' %}" class="btn btn-secondary">Limpiar</a>
+        </div>
+    </form>
+
+    <!-- Tabla de stock -->
+    <div class="table-responsive">
+        <table class="table-excel">
+            <thead>
+                <tr>
+                    <th scope="col">Código</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Depósito</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Cantidad</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in stock_items %}
+                <tr>
+                    <td>{{ item.codigo }}</td>
+                    <td>{{ item.descripcion }}</td>
+                    <td>{{ item.deposito }}</td>
+                    <td>{{ item.tipo_elemento }}</td>
+                    <td>{{ item.cantidad }}</td>
+                    <td>
+                        <a href="{% url 'editar_producto' item.codigo %}" class="btn btn-sm btn-warning">Editar</a>
+                        <a href="{% url 'eliminar_producto' item.codigo %}" class="btn btn-sm btn-danger">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+<div>
+    <!-- Botón para borrar stock -->
+    <div class="custom-border p-3">
+        <form method="post" action="{% url 'volver_stock_a_cero' %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger stock-zero-btn">
+                Volver Stock a 0 <span class="calavera">☠️</span> 
+            </button>
+        </form>
+        <form method="post" action="{% url 'eliminar_stock' %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Eliminar Stock</button>
+        </form>
+    </div>
 
-<a href="{% url 'agregar_producto' %}" class="btn btn-primary my-3">Agregar individualemente</a>
-<a href="{% url 'carga_masiva_stock' %}" class="btn btn-primary my-3">Agrear Con Excel</a>
+
+<!-- Estilos para la animación de la calavera -->
+<style>
+ 
+    .custom-border {
+        border: 2px solid red;
+        border-radius: 5px; /* Opcional, para bordes redondeados */
+    }
+
+
+    .btn-custom-green {
+        background-color: #28a745;  /* Verde personalizado */
+        color: white;
+    }
+
+    .btn-custom-green:hover {
+        background-color: #218838;  /* Verde más oscuro al pasar el ratón */
+    }
+
+    .stock-zero-btn .calavera {
+        visibility: hidden;
+    }
+
+    .stock-zero-btn:hover .calavera {
+        visibility: visible;
+        animation: shake 1s infinite;
+    }
+
+    @keyframes shake {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(10deg); }
+        50% { transform: rotate(-10deg); }
+        75% { transform: rotate(10deg); }
+        100% { transform: rotate(0deg); }
+    }
+</style>
 {% endblock %}

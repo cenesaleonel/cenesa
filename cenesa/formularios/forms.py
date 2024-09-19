@@ -85,3 +85,17 @@ class StockForm(forms.ModelForm):
             'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
         }
     
+    
+    
+
+from django import forms
+from .models import ArchivoExcelSubido
+class SubirArchivoExcelForm(forms.ModelForm):
+    class Meta:
+        model = ArchivoExcelSubido
+        fields = ['archivo']
+        widgets = {
+            'archivo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+    

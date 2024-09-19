@@ -521,3 +521,170 @@ def eliminar_producto(request, codigo):
     return redirect('listar_stock')
 
 
+import pandas as pd
+from django.http import HttpResponse
+from .models import Stock
+
+def descargar_stock(request):
+    # Obtener todos los productos del stock
+    stock_items = Stock.objects.all()
+
+    # Crear un DataFrame de pandas con los datos del stock
+    data = {
+        'Código': [item.codigo for item in stock_items],
+        'Descripción': [item.descripcion for item in stock_items],
+        'Depósito': [item.deposito for item in stock_items],
+        'Tipo de Elemento': [item.tipo_elemento for item in stock_items],
+        'Cantidad': [item.cantidad for item in stock_items],
+    }
+    
+    df = pd.DataFrame(data)
+
+    # Crear un archivo Excel en memoria
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=stock_actual.xlsx'
+    
+    # Escribir el DataFrame en el archivo Excel
+    with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False)
+
+    return response
+
+from django.contrib import messages
+
+def volver_stock_a_cero(request):
+    if request.method == 'POST':
+        # Proceso de validación: preguntar al usuario si está seguro
+        confirmar = request.POST.get('confirmar', 'no')
+        if confirmar == 'si':
+            # Validaciones adicionales pueden agregarse aquí (por ejemplo, permisos, o alguna otra validación)
+            Stock.objects.all().update(cantidad=0)
+            messages.success(request, 'Todo el stock ha sido puesto a 0.')
+        else:
+            messages.error(request, 'Acción cancelada.')
+    
+    return render(request, 'farmacia/confirmar_volver_stock_a_cero.html')
+
+
+def eliminar_stock(request):
+    if request.method == 'POST':
+        # Proceso de validación: preguntar al usuario si está seguro
+        confirmar = request.POST.get('confirmar', 'no')
+        if confirmar == 'si':
+            # Validaciones adicionales pueden agregarse aquí
+            Stock.objects.all().delete()
+            messages.success(request, 'Todo el stock ha sido eliminado.')
+        else:
+            messages.error(request, 'Acción cancelada.')
+    
+    return render(request, 'farmacia/confirmar_eliminar_stock.html')
+
+
+
+from django.contrib import messages
+from .models import Stock
+from .forms import SubirArchivoExcelForm
+def actualizar_inventario(request):
+    if request.method == 'POST':
+        form = SubirArchivoExcelForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            archivo_subido = form.save()
+
+            # Leer el archivo Excel subido
+            excel_path = archivo_subido.archivo.path
+            df = pd.read_excel(excel_path)
+
+            # Validar si el archivo contiene cambios
+            cambios_realizados = []
+            errores = []
+            for _, row in df.iterrows():
+                try:
+                    # Buscar el producto por código
+                    producto = Stock.objects.get(codigo=row['Código'])
+                    
+                    # Verificar si hubo algún cambio en las cantidades
+                    if producto.cantidad != row['Cantidad']:
+                        cambios_realizados.append({
+                            'producto': producto,
+                            'cantidad_original': producto.cantidad,
+                            'nueva_cantidad': row['Cantidad']
+                        })
+                        # Actualizar el stock
+                        producto.cantidad = row['Cantidad']
+                        producto.save()
+                except Stock.DoesNotExist:
+                    errores.append(f"Producto con código {row['Código']} no existe.")
+                except KeyError as e:
+                    errores.append(f"Columna faltante en el archivo Excel: {e}")
+
+            # Si no hubo cambios
+            if not cambios_realizados:
+                messages.warning(request, 'No se detectaron cambios en el archivo Excel.')
+            else:
+                messages.success(request, f"Se actualizaron {len(cambios_realizados)} productos.")
+            
+            # Reportar errores
+            if errores:
+                for error in errores:
+                    messages.error(request, error)
+
+            return redirect('listar_stock')
+    
+    else:
+        form = SubirArchivoExcelForm()
+
+    return render(request, 'farmacia/actualizar_inventario.html', {'form': form})
+
+import pandas as pd
+from django.http import HttpResponse
+from .models import Stock  # Asegúrate de tener el modelo correcto para el inventario
+
+def descargar_inventario(request):
+    # Obtener todos los productos del inventario
+    stock_items = Stock.objects.all()
+
+    # Crear un DataFrame de pandas con los datos del stock
+    data = {
+        'Código': [item.codigo for item in stock_items],
+        'Descripción': [item.descripcion for item in stock_items],
+        'Depósito': [item.deposito for item in stock_items],
+        'Tipo de Elemento': [item.tipo_elemento for item in stock_items],
+        'Cantidad': [item.cantidad for item in stock_items],
+    }
+
+    df = pd.DataFrame(data)
+
+    # Crear un archivo Excel en memoria
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=inventario_actual.xlsx'
+
+    # Escribir el DataFrame en el archivo Excel
+    with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False)
+
+    return response
+
+
+
+def descargar_estructura_excel(request):
+    # Crear un DataFrame con la estructura del Excel de importación
+    data = {
+        'Código': [],
+        'Descripción': [],
+        'Depósito': [],
+        'Tipo de Elemento': [],
+        'Cantidad': []
+    }
+
+    df = pd.DataFrame(data)
+
+    # Crear un archivo Excel en memoria
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=estructura_inventario.xlsx'
+
+    # Escribir el DataFrame en el archivo Excel
+    with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False)
+
+    return response

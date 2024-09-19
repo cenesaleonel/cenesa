@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Eliminar Stock</h1>
+    <p>¿Estás seguro que deseas eliminar todo el stock? Esta acción no se puede deshacer.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="confirmar" value="si" class="btn btn-danger">Sí, eliminar todo el stock</button>
+        <a href="{% url 'listar_stock' %}" class="btn btn-secondary">Cancelar</a>
+        <a href="{% url 'listar_stock' %}" class="btn btn-secondary">Volver</a>
+    </form>
+</div>
+{% endblock %}

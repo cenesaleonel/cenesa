@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <h1 class="mb-4">Carga Masiva de Stock</h1>
 
-    <form id="uploadForm" method="post" enctype="multipart/form-data" onsubmit="return validateFile()">
+    <form id="uploadForm" method="post" enctype="multipart/form-data" onsubmit="return validateFileAndShowProgress()">
         {% csrf_token %}
         
         <!-- Mensajes de error -->
@@ -15,14 +15,32 @@
         </div>
         <div class="mt-3">
             <button type="submit" class="btn btn-primary">Cargar</button>
+            <a href="{% url 'descargar_estructura_excel' %}" class="btn btn-success">Descargar Estructura de Importación</a>
             <a href="{% url 'listar_stock' %}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
 </div>
 
+<!-- Modal de carga -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loadingModalLabel">Procesando carga...</h5>
+      </div>
+      <div class="modal-body">
+        <p>Estamos procesando el archivo. Por favor, espera...</p>
+        <div class="progress">
+          <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-// Función para validar que se suba un archivo Excel
-function validateFile() {
+// Función para validar el archivo y mostrar la barra de progreso
+function validateFileAndShowProgress() {
     const input = document.querySelector('input[type="file"]');
     const file = input.files[0];
     const errorMessagesDiv = document.getElementById('errorMessages');
@@ -54,9 +72,29 @@ function validateFile() {
         return false;
     }
 
-    // No hay errores, ocultar el mensaje de error y permitir el envío del formulario
+    // No hay errores, ocultar el mensaje de error y mostrar la barra de progreso
     errorMessagesDiv.classList.add("d-none");
-    return true;
+
+    // Mostrar el modal de carga
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
+
+    // Simular la barra de progreso con una actualización gradual
+    const progressBar = document.getElementById('progressBar');
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 10;
+        progressBar.style.width = progress + "%";
+        progressBar.setAttribute('aria-valuenow', progress);
+        if (progress >= 100) {
+            clearInterval(interval);
+            // Aquí puedes cerrar el modal si deseas después de la carga
+            loadingModal.hide();
+        }
+    }, 1000);  // Simulación de actualización cada 0.5 segundos
+
+    return true; // Permitir el envío del formulario
 }
 </script>
+
 {% endblock %}
