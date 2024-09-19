@@ -291,3 +291,51 @@ button.btn-primary {
 button.btn-primary:hover {
     background-color: #45a049;
 }
+
+/* Mejorar la apariencia del submenú */
+.navbar-nav .dropdown-menu {
+    display: none; /* Oculto por defecto */
+    opacity: 0; /* Hacerlo transparente inicialmente */
+    visibility: hidden; /* Evitar que interfiera con otros elementos */
+    transform: translateY(10px); /* Posición inicial fuera de la pantalla */
+    transition: all 0.3s ease-in-out; /* Transición suave */
+}
+
+/* Al pasar el cursor sobre el dropdown-toggle, mostrar el submenú */
+.navbar-nav .dropdown:hover .dropdown-menu {
+    display: block; /* Mostrar submenú */
+    opacity: 1; /* Hacerlo completamente visible */
+    visibility: visible; /* Hacer que sea visible */
+    transform: translateY(0); /* Volverlo a su posición original */
+}
+
+/* Estilo para los ítems del submenú */
+.dropdown-menu {
+    background-color: #343a40; /* Color de fondo oscuro */
+    border: none; /* Quitar borde */
+    border-radius: 5px; /* Bordes redondeados */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra para dar profundidad */
+}
+
+/* Estilo para los links dentro del submenú */
+.dropdown-menu .dropdown-item {
+    color: #fff; /* Color del texto */
+    padding: 10px 20px; /* Espaciado interno */
+    transition: background-color 0.3s ease; /* Transición en el fondo */
+}
+
+/* Cambiar el color de fondo al pasar el ratón sobre los ítems del submenú */
+.dropdown-menu .dropdown-item:hover {
+    background-color: #495057; /* Color al pasar el ratón */
+    color: #fff; /* Mantener el color del texto */
+}
+
+/* Ajuste para dispositivos móviles: mostrar menú al hacer clic */
+@media (max-width: 992px) {
+    .navbar-nav .dropdown-menu {
+        display: none;
+    }
+    .navbar-nav .dropdown-menu.show {
+        display: block;
+    }
+}

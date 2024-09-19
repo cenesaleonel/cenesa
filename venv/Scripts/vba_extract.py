@@ -1,4 +1,4 @@
-#!E:\Desktop\cenesa\venv\Scripts\python.exe
+#!C:\Users\PC\Desktop\cenesa\venv\Scripts\python.exe
 
 ##############################################################################
 #
