@@ -31,29 +31,31 @@
                         <!-- Mostrar solo si el usuario es staff o superusuario -->
                         {% if request.user.is_authenticated and request.user.is_staff or request.user.is_superuser %}
                         <li class="nav-item">
-                        <a class="nav-link" href="/admin/">Administración</a>
+                            <a class="nav-link" href="/admin/">Administración</a>
                         </li>
                         <li class="nav-item">
-                        <a class="nav-link" href="{% url 'listar_formularios' %}">Formularios</a>
+                            <a class="nav-link" href="{% url 'listar_pedidos_autorizacion' %}">Autorizaciones</a>
                         </li>
                         <li class="nav-item">
-                        <a class="nav-link" href="{% url 'listar_pedidos_autorizacion' %}">Autorizaciones</a>
-                        </li>
-                        <li class="nav-item"></li>
-                            <a class="nav-link" href="{% url 'listar_stock' %}">Farmacia</a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="{% url 'listar_obras_sociales' %}">Obras Sociales</a>
-                        </li>
-    
-                        <li class="nav-item">
-                        <a class="nav-link" href="{% url 'subir_excel' %}">Carga de Valores Prestacionales</a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="{% url 'listar_archivos' %}">Listo de Valores Cargados</a>
+                            <a class="nav-link" href="{% url 'listar_formularios' %}">Formularios</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'crear_novedad' %}">Crear Novedad</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'listar_stock' %}">Farmacia</a>
+                        </li>
+                        
+                        <!-- Submenú desplegable para Obras Sociales -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Obras Sociales
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'listar_obras_sociales' %}">Obras Sociales</a></li>
+                                <li><a class="dropdown-item" href="{% url 'subir_excel' %}">Carga de Valores Prestacionales</a></li>
+                                <li><a class="dropdown-item" href="{% url 'listar_archivos' %}">Listado de Valores Cargados</a></li>
+                            </ul>
                         </li>
                         {% endif %}
                         <li class="nav-item">
