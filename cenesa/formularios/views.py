@@ -770,7 +770,7 @@ def descargar_stock_pdf(request):
         ])
 
     # Crear la tabla y aplicar estilo
-    table = Table(data, colWidths=[3 * cm, 6 * cm, 3 * cm, 5 * cm, 1 * cm])
+    table = Table(data, colWidths=[3 * cm, 6 * cm, 3 * cm, 5 * cm, 2 * cm])
 
     # Estilos para la tabla
     table.setStyle(TableStyle([
