@@ -28,6 +28,16 @@
         </div>
     </div>
 
+<div class="btn-group">
+    <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        Imprimir
+    </button>
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="{% url 'imprimir_stock' %}?codigo={{ filtro_codigo }}&descripcion={{ filtro_descripcion }}&deposito={{ filtro_deposito }}&tipo={{ filtro_tipo }}">Imprimir Stock Filtrado</a></li>
+    </ul>
+</div>
+
+
     <!-- Formulario de filtrado -->
     <form method="get" class="row g-3 mb-4">
         <div class="col-md-2">
@@ -350,3 +360,4 @@ document.getElementById('confirmar-eliminar').addEventListener('click', () => {
 </style>
 
 {% endblock %}
+

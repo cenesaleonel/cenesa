@@ -51,4 +51,5 @@ urlpatterns = [
     path('carga-formato-geclisa/', views.carga_formato_geclisa, name='carga_formato_geclisa'),
     path('descargar-stock-pdf/', views.descargar_stock_pdf, name='descargar_stock_pdf'),
     path('eliminar-producto/<str:codigo>/', views.eliminar_producto, name='eliminar_producto'),
+    path('imprimir-stock/', views.imprimir_stock, name='imprimir_stock'),
 ]

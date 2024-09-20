@@ -914,10 +914,8 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
-
 from django.http import HttpResponse
 from .models import Stock
-
 
 def descargar_stock_pdf(request):
     # Configurar el archivo PDF de respuesta
@@ -977,6 +975,51 @@ def descargar_stock_pdf(request):
 
     return response
 
+
+from django.template.loader import get_template
+import pdfkit # Si deseas exportar a PDF, puedes usar esta librería o una similar
+from django.core.paginator import Paginator
+from .models import Stock
+
+
+def imprimir_stock(request):
+    # Obtener los valores del filtro desde el request GET
+    filtro_codigo = request.GET.get('codigo', '')
+    filtro_descripcion = request.GET.get('descripcion', '')
+    filtro_deposito = request.GET.get('deposito', '')
+    filtro_tipo = request.GET.get('tipo', '')
+
+    # Filtrar los productos usando los valores de los filtros
+    stock_items = Stock.objects.all()
+
+    if filtro_codigo:
+        stock_items = stock_items.filter(codigo__icontains=filtro_codigo)
+    if filtro_descripcion:
+        stock_items = stock_items.filter(descripcion__icontains=filtro_descripcion)
+    if filtro_deposito:
+        stock_items = stock_items.filter(deposito__icontains=filtro_deposito)
+    if filtro_tipo:
+        stock_items = stock_items.filter(tipo_elemento__icontains=filtro_tipo)
+
+    # Opción para mostrar en HTML o generar PDF
+    if 'pdf' in request.GET:
+        template = get_template('farmacia/imprimir_stock_pdf.html')
+        html = template.render({'stock_items': stock_items})
+
+        # Generar PDF usando pdfkit
+        pdf = pdfkit.from_string(html, False)
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="stock_filtrado.pdf"'
+        return response
+
+    # Renderizar una página para imprimir
+    return render(request, 'farmacia/imprimir_stock.html', {
+        'stock_items': stock_items,  # Pasar los elementos filtrados para imprimir
+        'filtro_codigo': filtro_codigo,
+        'filtro_descripcion': filtro_descripcion,
+        'filtro_deposito': filtro_deposito,
+        'filtro_tipo': filtro_tipo
+    })
 
 
 
