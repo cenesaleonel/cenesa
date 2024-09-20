@@ -44,5 +44,7 @@ urlpatterns = [
     path('descargar-inventario/', views.descargar_inventario, name='descargar_inventario'),
     path('descargar-estructura-excel/', views.descargar_estructura_excel, name='descargar_estructura_excel'),
     path('modificar-stock/<str:codigo>/', views.modificar_stock, name='modificar_stock'),
+    path('carga-formato-geclisa/', views.carga_formato_geclisa, name='carga_formato_geclisa'),
+    path('descargar-stock-pdf/', views.descargar_stock_pdf, name='descargar_stock_pdf'),
     
 ]

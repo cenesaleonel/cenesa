@@ -99,3 +99,11 @@ class SubirArchivoExcelForm(forms.ModelForm):
         }
 
     
+    
+
+
+class UploadStockForm(forms.Form):
+    archivo_excel = forms.FileField(
+        label="Selecciona un archivo Excel (.xls o .xlsx)",
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )

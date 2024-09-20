@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Carga de Stock Geclisa</h1>
+
+    <!-- Mensajes de error -->
+    <div id="errorMessages" class="alert alert-danger d-none" role="alert"></div>
+
+    <!-- Formulario de subida -->
+    <form id="uploadForm" method="post" enctype="multipart/form-data" onsubmit="return validateFile()">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.as_p }}
+        </div>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Subir y Actualizar</button>
+            <a href="{% url 'listar_stock' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<!-- Modal de carga -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingModalLabel">Procesando archivo</h5>
+            </div>
+            <div class="modal-body">
+                <div class="progress">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="mt-3">Por favor espera mientras se procesa tu archivo...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function validateFile() {
+        const input = document.querySelector('input[type="file"]');
+        const file = input.files[0];
+        const errorMessagesDiv = document.getElementById('errorMessages');
+        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        const progressBar = document.getElementById('progressBar');
+        let errorMessages = [];
+
+        // Verificar que se haya subido un archivo
+        if (!file) {
+            errorMessages.push("Por favor, selecciona un archivo Excel.");
+        } else {
+            // Verificar la extensión del archivo
+            const fileName = file.name;
+            const fileExtension = fileName.split('.').pop().toLowerCase();
+
+            if (fileExtension !== 'xlsx' && fileExtension !== 'xls') {
+                errorMessages.push("Por favor, selecciona un archivo Excel válido (.xls o .xlsx).");
+            }
+
+            // Verificar que el tamaño del archivo no sea mayor a 10 MB (personalizable)
+            const maxSizeInBytes = 10 * 1024 * 1024;
+            if (file.size > maxSizeInBytes) {
+                errorMessages.push("El archivo es demasiado grande. El tamaño máximo permitido es 10 MB.");
+            }
+        }
+
+        // Si hay errores, mostrar los mensajes y evitar el envío del formulario
+        if (errorMessages.length > 0) {
+            errorMessagesDiv.innerHTML = errorMessages.join("<br>");
+            errorMessagesDiv.classList.remove("d-none");
+            return false;
+        }
+
+        // No hay errores, mostrar modal y barra de progreso
+        errorMessagesDiv.classList.add("d-none");
+        loadingModal.show();
+
+        // Simular la barra de progreso
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            progressBar.style.width = progress + "%";
+            progressBar.setAttribute('aria-valuenow', progress);
+            if (progress >= 100) {
+                clearInterval(interval);
+            }
+        }, 1000);  
+
+        return true; // Permitir el envío del formulario
+    }
+</script>
+
+{% endblock %}

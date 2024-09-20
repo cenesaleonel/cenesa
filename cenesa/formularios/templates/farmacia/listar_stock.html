@@ -5,13 +5,30 @@
 <div class="container mt-5">
     <h1 class="my-4">Lista de Stock</h1>
 
-    <!-- Botones para agregar, descargar y borrar stock -->
+    
     <div class="mb-4">
         <a href="{% url 'agregar_producto' %}" class="btn btn-custom-green">Agregar individualmente</a>
-        <a href="{% url 'carga_masiva_stock' %}" class="btn btn-custom-green">Agregar Elementos Con Excel</a>
+        <div class="btn-group">
+            <button type="button" class="btn btn-custom-green dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                Agregar Elementos Con Excel
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'carga_masiva_stock' %}">Cargar Formato Estándar</a></li>
+                <li><a class="dropdown-item" href="{% url 'carga_formato_geclisa' %}">Cargar Formato Geclisa</a></li>
+            </ul>
+        </div>
         <a href="{% url 'actualizar_inventario' %}" class="btn btn-custom-green">Actualizar Inventario</a>
-        <a href="{% url 'descargar_stock' %}" class="btn btn-success">Descargar Stock</a> 
+        <div class="btn-group">
+            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                Descargar Stock
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'descargar_stock' %}">Descargar en Excel</a></li>
+                <li><a class="dropdown-item" href="{% url 'descargar_stock_pdf' %}">Descargar en PDF</a></li>
+            </ul>
+        </div>
     </div>
+    
 
     <!-- Formulario de filtrado -->
     <form method="get" class="row g-3 mb-4">

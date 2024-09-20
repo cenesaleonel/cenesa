@@ -431,10 +431,6 @@ def carga_masiva_stock(request):
                     messages.error(request, 'La columna "Cantidad" debe contener valores numéricos y no estar vacía.')
                     return redirect('carga_masiva_stock')
 
-                # Verificar que no haya códigos duplicados en el archivo
-                if df['Codigo'].duplicated().any():
-                    messages.error(request, 'El archivo contiene códigos de productos duplicados.')
-                    return redirect('carga_masiva_stock')
 
                 # Si pasa todas las validaciones, actualizar o crear el stock
                 for _, row in df.iterrows():
@@ -550,6 +546,8 @@ def descargar_stock(request):
 
     return response
 
+
+
 from django.contrib import messages
 
 def volver_stock_a_cero(request):
@@ -584,26 +582,59 @@ def eliminar_stock(request):
 from django.contrib import messages
 from .models import Stock
 from .forms import SubirArchivoExcelForm
+import pandas as pd
+import os
+
 def actualizar_inventario(request):
     if request.method == 'POST':
         form = SubirArchivoExcelForm(request.POST, request.FILES)
         
         if form.is_valid():
             archivo_subido = form.save()
-
-            # Leer el archivo Excel subido
             excel_path = archivo_subido.archivo.path
-            df = pd.read_excel(excel_path)
 
-            # Validar si el archivo contiene cambios
+            # Validar formato de archivo (.xls o .xlsx)
+            if not excel_path.endswith(('.xls', '.xlsx')):
+                messages.error(request, 'El archivo debe ser en formato Excel (.xls o .xlsx).')
+                return redirect('actualizar_inventario')
+
+            # Intentar leer el archivo Excel
+            try:
+                if excel_path.endswith('.xls'):
+                    df = pd.read_excel(excel_path, engine='xlrd')
+                else:
+                    df = pd.read_excel(excel_path)
+            except Exception as e:
+                messages.error(request, f"Error al leer el archivo: {str(e)}. Asegúrese de que el archivo no esté corrupto.")
+                return redirect('actualizar_inventario')
+
+            # Validar que el archivo contenga las columnas requeridas
+            required_columns = ['Código', 'Cantidad']
+            missing_columns = [col for col in required_columns if col not in df.columns]
+
+            if missing_columns:
+                messages.error(request, f"Faltan las siguientes columnas requeridas en el archivo Excel: {', '.join(missing_columns)}.")
+                return redirect('actualizar_inventario')
+
+            # Validar que la columna "Cantidad" sea numérica
+            try:
+                df['Cantidad'] = pd.to_numeric(df['Cantidad'], errors='coerce')
+                if df['Cantidad'].isnull().any():
+                    raise ValueError("La columna 'Cantidad' contiene valores no numéricos o vacíos.")
+            except ValueError as ve:
+                messages.error(request, f"Error en la columna 'Cantidad': {ve}")
+                return redirect('actualizar_inventario')
+
+            # Procesar cambios en el inventario
             cambios_realizados = []
             errores = []
+
             for _, row in df.iterrows():
                 try:
                     # Buscar el producto por código
                     producto = Stock.objects.get(codigo=row['Código'])
                     
-                    # Verificar si hubo algún cambio en las cantidades
+                    # Verificar si hubo algún cambio en la cantidad
                     if producto.cantidad != row['Cantidad']:
                         cambios_realizados.append({
                             'producto': producto,
@@ -614,22 +645,28 @@ def actualizar_inventario(request):
                         producto.cantidad = row['Cantidad']
                         producto.save()
                 except Stock.DoesNotExist:
-                    errores.append(f"Producto con código {row['Código']} no existe.")
+                    errores.append(f"Producto con código {row['Código']} no existe en la base de datos.")
                 except KeyError as e:
                     errores.append(f"Columna faltante en el archivo Excel: {e}")
+                except Exception as e:
+                    errores.append(f"Error al procesar el código {row['Código']}: {str(e)}")
 
-            # Si no hubo cambios
-            if not cambios_realizados:
-                messages.warning(request, 'No se detectaron cambios en el archivo Excel.')
+            # Feedback al usuario sobre los cambios realizados
+            if cambios_realizados:
+                messages.success(request, f"Se actualizaron {len(cambios_realizados)} productos con éxito.")
             else:
-                messages.success(request, f"Se actualizaron {len(cambios_realizados)} productos.")
-            
-            # Reportar errores
+                messages.warning(request, 'No se detectaron cambios en el inventario.')
+
+            # Informar al usuario sobre los errores encontrados
             if errores:
                 for error in errores:
                     messages.error(request, error)
 
+            # Redirigir al listado de stock
             return redirect('listar_stock')
+
+        else:
+            messages.error(request, "Por favor, corrija los errores en el formulario antes de continuar.")
     
     else:
         form = SubirArchivoExcelForm()
@@ -670,10 +707,10 @@ def descargar_inventario(request):
 def descargar_estructura_excel(request):
     # Crear un DataFrame con la estructura del Excel de importación
     data = {
-        'Código': [],
-        'Descripción': [],
-        'Depósito': [],
-        'Tipo de Elemento': [],
+        'Codigo': [],
+        'Descripccion': [],
+        'Deposito': [],
+        'Tipo de elementos': [],
         'Cantidad': []
     }
 
@@ -688,6 +725,77 @@ def descargar_estructura_excel(request):
         df.to_excel(writer, index=False)
 
     return response
+
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import cm
+
+from django.http import HttpResponse
+from .models import Stock
+
+
+def descargar_stock_pdf(request):
+    # Configurar el archivo PDF de respuesta
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="stock_actual.pdf"'
+
+    # Crear el PDF utilizando reportlab
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+
+    # Estilos
+    styles = getSampleStyleSheet()
+    title_style = styles['Title']
+    table_style = styles['BodyText']
+
+    # Título del PDF
+    elements.append(Paragraph("Listado de Stock Actual", title_style))
+
+    # Obtener los datos del stock
+    stock_items = Stock.objects.all()
+
+    # Crear la tabla con los datos
+    data = [['Código', 'Descripción', 'Depósito', 'Tipo de Elemento', 'Cantidad']]  # Encabezados
+
+    # Agregar cada fila de datos del stock con ajuste de texto
+    for item in stock_items:
+        data.append([
+            item.codigo,
+            Paragraph(item.descripcion, table_style),  # Ajuste de texto
+            item.deposito,
+            item.tipo_elemento,
+            item.cantidad
+        ])
+
+    # Crear la tabla y aplicar estilo
+    table = Table(data, colWidths=[3 * cm, 6 * cm, 3 * cm, 5 * cm, 1 * cm])
+
+    # Estilos para la tabla
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Alinear el texto al medio
+        ('WRAP', (1, 1), (-1, -1)),  # Aplicar ajuste de texto a todo
+    ]))
+
+    # Añadir la tabla al documento
+    elements.append(table)
+
+    # Generar el PDF
+    doc.build(elements)
+
+    return response
+
+
+
 
 from django.shortcuts import redirect, get_object_or_404
 from .models import Stock  # Asegúrate de usar el modelo correcto
@@ -704,3 +812,53 @@ def modificar_stock(request, codigo):
 
     item.save()
     return redirect('listar_stock')
+
+
+def carga_formato_geclisa(request):
+    if request.method == 'POST':
+        form = UploadStockForm(request.POST, request.FILES)
+        if form.is_valid():
+            archivo = request.FILES['archivo_excel']
+
+            # Validar que el archivo sea .xls
+            if not archivo.name.endswith('.xls'):
+                messages.error(request, 'El archivo debe estar en formato Excel (.xls).')
+                return redirect('carga_formato_geclisa')
+
+            try:
+                # Leer el archivo .xls usando xlrd
+                df = pd.read_excel(archivo, engine='xlrd')
+
+                # Asegurarse de que las columnas requeridas existan
+                required_columns = ['cant', 'ele_cod', 'ele_nombre', 'dep_nombre', 'te_nombre']
+                for col in required_columns:
+                    if col not in df.columns:
+                        messages.error(request, f"Falta la columna requerida: {col}")
+                        return redirect('carga_formato_geclisa')
+
+                # Validar que la columna "cant" sea numérica y no tenga valores nulos
+                if df['cant'].isnull().any() or not pd.api.types.is_numeric_dtype(df['cant']):
+                    messages.error(request, 'La columna "cant" debe contener valores numéricos y no estar vacía.')
+                    return redirect('carga_formato_geclisa')
+
+                # Procesar cada fila del archivo y actualizar/crear el stock
+                for _, row in df.iterrows():
+                    Stock.objects.update_or_create(
+                        codigo=row['ele_cod'],
+                        defaults={
+                            'descripcion': row['ele_nombre'],
+                            'deposito': row['dep_nombre'],
+                            'tipo_elemento': row['te_nombre'],
+                            'cantidad': row['cant'],
+                        }
+                    )
+
+                messages.success(request, 'El archivo Geclisa se cargó correctamente.')
+                return redirect('listar_stock')
+
+            except Exception as e:
+                messages.error(request, f'Ocurrió un error al procesar el archivo: {e}')
+                return redirect('carga_formato_geclisa')
+    else:
+        form = UploadStockForm()
+    return render(request, 'farmacia/carga_formato_geclisa.html', {'form': form})

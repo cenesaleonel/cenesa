@@ -24,28 +24,53 @@
         const fileInput = document.querySelector('input[type="file"]');
         const errorMessage = document.getElementById('error-message');
         const allowedExtensions = /(\.xls|\.xlsx)$/i;
+        const errorMessagesDiv = document.getElementById('errorMessages');  // Mensaje de error
+        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));  // Modal de carga
+        const progressBar = document.getElementById('progressBar');  // Barra de progreso
+
+        let errorMessages = [];
 
         // Limpiar mensaje de error
         errorMessage.style.display = 'none';
-        errorMessage.innerHTML = '';
+        errorMessagesDiv.innerHTML = '';
 
         // Verificar si se ha seleccionado un archivo
         if (!fileInput.value) {
             event.preventDefault();
-            errorMessage.style.display = 'block';
-            errorMessage.innerHTML = 'Por favor, selecciona un archivo para cargar.';
-            return;
+            errorMessages.push('Por favor, selecciona un archivo para cargar.');
         }
 
         // Verificar si el archivo es un Excel
         if (!allowedExtensions.exec(fileInput.value)) {
             event.preventDefault();
-            errorMessage.style.display = 'block';
-            errorMessage.innerHTML = 'El archivo seleccionado no es válido. Por favor, selecciona un archivo Excel con extensión .xls o .xlsx.';
-            return;
+            errorMessages.push('El archivo seleccionado no es válido. Por favor, selecciona un archivo Excel con extensión .xls o .xlsx.');
         }
 
-        // Si todas las validaciones pasan, permitir el envío del formulario
+        // Si hay errores, mostrar los mensajes y evitar el envío del formulario
+        if (errorMessages.length > 0) {
+            errorMessagesDiv.innerHTML = errorMessages.join("<br>");
+            errorMessagesDiv.classList.remove("d-none");
+            return false;
+        }
+
+        // No hay errores, mostrar modal y barra de progreso
+        errorMessagesDiv.classList.add("d-none");
+        loadingModal.show();
+
+        // Simular la barra de progreso
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            progressBar.style.width = progress + "%";
+            progressBar.setAttribute('aria-valuenow', progress);
+            if (progress >= 100) {
+                clearInterval(interval);
+                loadingModal.hide();  // Ocultar el modal al completar el progreso
+            }
+        }, 1000);  // Simular la barra de progreso cada segundo
+
+        return true;  // Permitir el envío del formulario
     });
 </script>
+
 {% endblock %}
