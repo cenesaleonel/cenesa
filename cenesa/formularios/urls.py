@@ -35,8 +35,6 @@ urlpatterns = [
     path('listar-stock/', views.listar_stock, name='listar_stock'),
     path('agregar-producto/', views.agregar_producto, name='agregar_producto'),
     path('editar-producto/<str:codigo>/', views.editar_producto, name='editar_producto'),
-    path('eliminar-producto/<str:codigo>/', views.eliminar_producto, name='eliminar_producto'),
-    
     path('descargar-stock/', views.descargar_stock, name='descargar_stock'),
     path('volver-stock-cero/', views.volver_stock_a_cero, name='volver_stock_a_cero'),
     path('eliminar-stock/', views.eliminar_stock, name='eliminar_stock'),
@@ -46,5 +44,5 @@ urlpatterns = [
     path('modificar-stock/<str:codigo>/', views.modificar_stock, name='modificar_stock'),
     path('carga-formato-geclisa/', views.carga_formato_geclisa, name='carga_formato_geclisa'),
     path('descargar-stock-pdf/', views.descargar_stock_pdf, name='descargar_stock_pdf'),
-    
+    path('eliminar-producto/<str:codigo>/', views.eliminar_producto, name='eliminar_producto'),
 ]

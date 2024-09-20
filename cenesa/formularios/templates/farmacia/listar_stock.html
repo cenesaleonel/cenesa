@@ -83,12 +83,27 @@
 
                     <td>
                         <a href="{% url 'editar_producto' item.codigo %}" class="btn btn-sm btn-warning">Editar</a>
-                        <a href="{% url 'eliminar_producto' item.codigo %}" class="btn btn-sm btn-danger">Eliminar</a>
+                        <button type="button" class="btn btn-sm btn-danger btn-eliminar" data-codigo="{{ item.codigo }}">Eliminar</button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Modal para confirmar eliminación -->
+<div id="eliminar-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este producto?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="confirmar-eliminar" class="btn btn-danger">Eliminar</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -107,14 +122,17 @@
 </div>
 
 <script>
-// Función AJAX para modificar el stock
+    // Almacenar el código del producto a eliminar temporalmente
+let productoAEliminar = null;
+
+// Función para modificar el stock
 function modificarStock(codigo, accion, cantidad) {
     const form = document.getElementById(`form-${codigo}`);
     const formData = new FormData(form);
     formData.append('accion', accion);
 
     if (!cantidad) {
-        formData.append('cantidad', 1); // Por defecto, incrementar o decrementar 1
+        formData.append('cantidad', 1);  // Si no hay cantidad, por defecto sumar o restar 1
     }
 
     fetch(`/modificar-stock/${codigo}/`, {
@@ -127,14 +145,10 @@ function modificarStock(codigo, accion, cantidad) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Actualizar cantidad en la página
             document.getElementById(`cantidad-${codigo}`).innerText = data.nueva_cantidad;
-
-            // Mostrar mensaje de éxito
             document.getElementById('mensaje-texto').innerText = data.mensaje;
             new bootstrap.Modal(document.getElementById('mensaje-modal')).show();
         } else {
-            // Mostrar mensaje de error
             document.getElementById('mensaje-texto').innerText = data.error;
             new bootstrap.Modal(document.getElementById('mensaje-modal')).show();
         }
@@ -144,7 +158,7 @@ function modificarStock(codigo, accion, cantidad) {
     });
 }
 
-// Manejar los botones de incremento y decremento
+// Manejar incremento y decremento
 document.querySelectorAll('.btn-incrementar').forEach(button => {
     button.addEventListener('click', (event) => {
         const codigo = event.target.getAttribute('data-codigo');
@@ -160,7 +174,60 @@ document.querySelectorAll('.btn-decrementar').forEach(button => {
         modificarStock(codigo, 'decrementar', cantidad);
     });
 });
+
+// Manejar el clic en el botón de eliminar
+document.querySelectorAll('.btn-eliminar').forEach(button => {
+    button.addEventListener('click', (event) => {
+        productoAEliminar = event.target.getAttribute('data-codigo');
+        new bootstrap.Modal(document.getElementById('eliminar-modal')).show();
+    });
+});
+
+// Confirmar eliminación
+document.getElementById('confirmar-eliminar').addEventListener('click', () => {
+    if (productoAEliminar) {
+        fetch(`/eliminar-producto/${productoAEliminar}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Eliminar la fila del producto eliminado del DOM
+                const row = document.getElementById(`row-${productoAEliminar}`);
+                if (row) {
+                    row.remove();
+                }
+
+                // Mostrar mensaje de éxito
+                document.getElementById('mensaje-texto').innerText = data.message;
+                new bootstrap.Modal(document.getElementById('mensaje-modal')).show();
+
+                // Restablecer la variable del producto a eliminar
+                productoAEliminar = null;
+
+                // Cerrar el modal de confirmación de eliminación correctamente
+                const eliminarModal = bootstrap.Modal.getInstance(document.getElementById('eliminar-modal'));
+                eliminarModal.hide();
+            } else {
+                // Mostrar mensaje de error si no se pudo eliminar
+                document.getElementById('mensaje-texto').innerText = data.message;
+                new bootstrap.Modal(document.getElementById('mensaje-modal')).show();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Mostrar mensaje de error en caso de fallo en la solicitud
+            document.getElementById('mensaje-texto').innerText = 'Error al eliminar el producto. Por favor, intenta nuevamente.';
+            new bootstrap.Modal(document.getElementById('mensaje-modal')).show();
+        });
+    }
+});
+
 </script>
+    
 
 <!-- Estilos personalizados -->
 <style>

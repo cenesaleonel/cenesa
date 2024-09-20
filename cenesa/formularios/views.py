@@ -510,11 +510,31 @@ def editar_producto(request, codigo):
     return render(request, 'farmacia/editar_producto.html', {'form': form})
 
 
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Stock
+
 # Vista para eliminar un producto
 def eliminar_producto(request, codigo):
-    producto = get_object_or_404(Stock, codigo=codigo)
-    producto.delete()
-    return redirect('listar_stock')
+    if request.method == 'POST':
+        producto = get_object_or_404(Stock, codigo=codigo)
+        descripcion_producto = producto.descripcion  # Guardamos la descripción antes de eliminar
+        
+        # Eliminar el producto
+        producto.delete()
+
+        # Retornar respuesta JSON con éxito
+        return JsonResponse({
+            'success': True,
+            'message': f'Producto con código {codigo} y descripción {descripcion_producto} eliminado con éxito.'
+        })
+    
+    # Si no es una solicitud POST, retornar un error 400
+    return JsonResponse({'success': False, 'message': 'Solicitud no permitida.'}, status=400)
+
+
+
+
 
 
 import pandas as pd
