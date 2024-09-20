@@ -726,6 +726,7 @@ def descargar_estructura_excel(request):
 
     return response
 
+
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
@@ -798,20 +799,54 @@ def descargar_stock_pdf(request):
 
 
 from django.shortcuts import redirect, get_object_or_404
-from .models import Stock  # Asegúrate de usar el modelo correcto
-
+from django.contrib import messages
+from .models import Stock  
 # Función para modificar el stock
 def modificar_stock(request, codigo):
     item = get_object_or_404(Stock, codigo=codigo)
-    cantidad = int(request.POST.get('cantidad', 0))  # Obtener la cantidad del formulario
+    
+    # Obtener la cantidad del formulario. Si no se proporciona, se establece en 1.
+    cantidad = request.POST.get('cantidad')
+    if not cantidad:
+        cantidad = 1  # Valor por defecto si no se proporciona cantidad
+    else:
+        try:
+            cantidad = int(cantidad)  # Asegurar que sea un entero
+        except ValueError:
+            messages.error(request, 'Cantidad inválida. Intente nuevamente.')
+            return redirect('listar_stock')
 
+    # Guardar la cantidad anterior para mostrar en el mensaje
+    cantidad_anterior = item.cantidad
+
+    # Verificar la acción (incrementar o decrementar)
     if request.POST.get('accion') == 'incrementar':
         item.cantidad += cantidad  # Incrementar el stock
-    elif request.POST.get('accion') == 'decrementar' and item.cantidad >= cantidad:
-        item.cantidad -= cantidad  # Decrementar el stock (solo si es mayor o igual)
+        messages.success(
+            request, 
+            f'Se ha aumentado el stock de "{item.descripcion}" (Código: {item.codigo}) de {cantidad_anterior} a {item.cantidad}.'
+        )
+    elif request.POST.get('accion') == 'decrementar':
+        if item.cantidad >= cantidad:
+            item.cantidad -= cantidad  # Decrementar el stock
+            messages.success(
+                request, 
+                f'Se ha reducido el stock de "{item.descripcion}" (Código: {item.codigo}) de {cantidad_anterior} a {item.cantidad}.'
+            )
+        else:
+            messages.error(
+                request, 
+                f'No se puede reducir el stock de "{item.descripcion}" (Código: {item.codigo}) por debajo de 0. Stock actual: {item.cantidad}.'
+            )
+            return redirect('listar_stock')
 
+    # Guardar los cambios en el modelo
     item.save()
+    
     return redirect('listar_stock')
+
+
+
 
 
 def carga_formato_geclisa(request):
