@@ -610,6 +610,7 @@ def carga_masiva_stock(request):
     return render(request, 'farmacia/carga_masiva_stock.html', {'form': form})
 
 
+from django.core.paginator import Paginator
 from django.db.models import Q
 
 def listar_stock(request):
@@ -630,14 +631,20 @@ def listar_stock(request):
         stock_items = stock_items.filter(deposito__icontains=filtro_deposito)
     if filtro_tipo:
         stock_items = stock_items.filter(tipo_elemento__icontains=filtro_tipo)
+    # Paginación: mostrar 20 elementos por página
+    paginator = Paginator(stock_items, 20)  # 20 elementos por página
+    page_number = request.GET.get('page')  # Obtener el número de página de la solicitud GET
+    page_obj = paginator.get_page(page_number)  # Obtener los elementos paginados
 
     return render(request, 'farmacia/listar_stock.html', {
-        'stock_items': stock_items,
+        'stock_items': page_obj,  # Usar los elementos paginados en lugar del queryset completo
         'filtro_codigo': filtro_codigo,
         'filtro_descripcion': filtro_descripcion,
         'filtro_deposito': filtro_deposito,
-        'filtro_tipo': filtro_tipo
+        'filtro_tipo': filtro_tipo,
+        'page_obj': page_obj  # Pasar la información de la página para manejar la paginación en la plantilla
     })
+
 
 
 # Vista para agregar un nuevo producto

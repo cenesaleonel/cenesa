@@ -60,20 +60,71 @@
     </table>
 
     <!-- Paginación -->
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
+    <div class="pagination">
+        <span class="step-links">
             {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?codigo={{ codigo_query }}&nombre={{ nombre_query }}&page={{ page_obj.previous_page_number }}">Anterior</a>
-            </li>
+                <a href="?page=1{% if request.GET %}&amp;{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&amp;{% endif %}{% endfor %}{% endif %}">Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&amp;{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&amp;{% endif %}{% endfor %}{% endif %}">Anterior</a>
             {% endif %}
-            <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+    
+            <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    
             {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?codigo={{ codigo_query }}&nombre={{ nombre_query }}&page={{ page_obj.next_page_number }}">Siguiente</a>
-            </li>
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET %}&amp;{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&amp;{% endif %}{% endfor %}{% endif %}">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET %}&amp;{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&amp;{% endif %}{% endfor %}{% endif %}">Última</a>
             {% endif %}
-        </ul>
-    </nav>
-</div>
+        </span>
+    </div>
+<style>
+    .btn-warning:hover,
+    .btn-warning:focus,
+    .btn-warning:active {
+        background-color: red;
+        border-color: red;
+    }
+    
+    .btn-danger:hover,
+    .btn-danger:focus,
+    .btn-danger:active {
+        background-color: red;
+        border-color: red;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+    }
+    
+    .pagination .step-links {
+        display: flex;
+        gap: 10px;
+        font-size: 16px;
+    }
+    
+    .pagination a {
+        padding: 8px 16px;
+        background-color: #f8f9fa;
+        color: #007bff;
+        text-decoration: none;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+    
+    .pagination a:hover {
+        background-color: #e2e6ea;
+        color: #0056b3;
+    }
+    
+    .pagination span {
+        padding: 8px 16px;
+    }
+    
+    .pagination .step-links a[disabled] {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: #dee2e6;
+    }
+</style>
+
 {% endblock %}
