@@ -5,7 +5,6 @@
 <div class="container mt-5">
     <h1 class="my-4">Lista de Stock</h1>
 
-    
     <div class="mb-4">
         <a href="{% url 'agregar_producto' %}" class="btn btn-custom-green">Agregar individualmente</a>
         <div class="btn-group">
@@ -28,7 +27,6 @@
             </ul>
         </div>
     </div>
-    
 
     <!-- Formulario de filtrado -->
     <form method="get" class="row g-3 mb-4">
@@ -66,19 +64,19 @@
             </thead>
             <tbody>
                 {% for item in stock_items %}
-                <tr>
+                <tr id="row-{{ item.codigo }}">
                     <td>{{ item.codigo }}</td>
                     <td>{{ item.descripcion }}</td>
                     <td>{{ item.deposito }}</td>
                     <td>{{ item.tipo_elemento }}</td>
-                    <td>{{ item.cantidad }}</td>
+                    <td id="cantidad-{{ item.codigo }}">{{ item.cantidad }}</td>
                     <td>
-                        <form method="post" action="{% url 'modificar_stock' item.codigo %}">
+                        <form id="form-{{ item.codigo }}" class="modificar-stock-form">
                             {% csrf_token %}
                             <div class="input-group">
-                                <input type="number" name="cantidad" class="form-control" placeholder="Cantidad">
-                                <button type="submit" name="accion" value="incrementar" class="btn btn-success">➕</button>
-                                <button type="submit" name="accion" value="decrementar" class="btn btn-danger">➖</button>
+                                <input type="number" name="cantidad" class="form-control" placeholder="Cantidad" min="1">
+                                <button type="button" class="btn btn-success btn-incrementar" data-codigo="{{ item.codigo }}">➕</button>
+                                <button type="button" class="btn btn-danger btn-decrementar" data-codigo="{{ item.codigo }}">➖</button>
                             </div>
                         </form>
                     </td>
@@ -93,35 +91,91 @@
         </table>
     </div>
 </div>
-<div>
-    <!-- Botón para borrar stock -->
-    <div class="custom-border p-3">
-        <form method="post" action="{% url 'volver_stock_a_cero' %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger stock-zero-btn">
-                Volver Stock a 0 <span class="calavera">☠️</span> 
-            </button>
-        </form>
-        <form method="post" action="{% url 'eliminar_stock' %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Eliminar Stock</button>
-        </form>
-    </div>
 
-<!-- Estilos para la animación de la calavera -->
+<!-- Modal para mostrar mensajes -->
+<div id="mensaje-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p id="mensaje-texto"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Función AJAX para modificar el stock
+function modificarStock(codigo, accion, cantidad) {
+    const form = document.getElementById(`form-${codigo}`);
+    const formData = new FormData(form);
+    formData.append('accion', accion);
+
+    if (!cantidad) {
+        formData.append('cantidad', 1); // Por defecto, incrementar o decrementar 1
+    }
+
+    fetch(`/modificar-stock/${codigo}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar cantidad en la página
+            document.getElementById(`cantidad-${codigo}`).innerText = data.nueva_cantidad;
+
+            // Mostrar mensaje de éxito
+            document.getElementById('mensaje-texto').innerText = data.mensaje;
+            new bootstrap.Modal(document.getElementById('mensaje-modal')).show();
+        } else {
+            // Mostrar mensaje de error
+            document.getElementById('mensaje-texto').innerText = data.error;
+            new bootstrap.Modal(document.getElementById('mensaje-modal')).show();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+// Manejar los botones de incremento y decremento
+document.querySelectorAll('.btn-incrementar').forEach(button => {
+    button.addEventListener('click', (event) => {
+        const codigo = event.target.getAttribute('data-codigo');
+        const cantidad = event.target.previousElementSibling.value || 1;
+        modificarStock(codigo, 'incrementar', cantidad);
+    });
+});
+
+document.querySelectorAll('.btn-decrementar').forEach(button => {
+    button.addEventListener('click', (event) => {
+        const codigo = event.target.getAttribute('data-codigo');
+        const cantidad = event.target.previousElementSibling.value || 1;
+        modificarStock(codigo, 'decrementar', cantidad);
+    });
+});
+</script>
+
+<!-- Estilos personalizados -->
 <style>
     .custom-border {
         border: 2px solid red;
-        border-radius: 5px; /* Opcional, para bordes redondeados */
+        border-radius: 5px;
     }
 
     .btn-custom-green {
-        background-color: #28a745;  /* Verde personalizado */
+        background-color: #28a745;
         color: white;
     }
 
     .btn-custom-green:hover {
-        background-color: #218838;  /* Verde más oscuro al pasar el ratón */
+        background-color: #218838;
     }
 
     .stock-zero-btn .calavera {

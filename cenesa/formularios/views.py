@@ -798,52 +798,52 @@ def descargar_stock_pdf(request):
 
 
 
-from django.shortcuts import redirect, get_object_or_404
-from django.contrib import messages
-from .models import Stock  
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Stock
+
 # Función para modificar el stock
 def modificar_stock(request, codigo):
-    item = get_object_or_404(Stock, codigo=codigo)
-    
-    # Obtener la cantidad del formulario. Si no se proporciona, se establece en 1.
-    cantidad = request.POST.get('cantidad')
-    if not cantidad:
-        cantidad = 1  # Valor por defecto si no se proporciona cantidad
-    else:
-        try:
-            cantidad = int(cantidad)  # Asegurar que sea un entero
-        except ValueError:
-            messages.error(request, 'Cantidad inválida. Intente nuevamente.')
-            return redirect('listar_stock')
+    if request.method == 'POST':
+        item = get_object_or_404(Stock, codigo=codigo)
 
-    # Guardar la cantidad anterior para mostrar en el mensaje
-    cantidad_anterior = item.cantidad
+        # Caso 1: Si el usuario ingresa una cantidad específica, tomarla; de lo contrario, usar 1
+        cantidad_input = request.POST.get('cantidad', '')  # Intentar obtener el valor del formulario
+        cantidad = int(cantidad_input) if cantidad_input else 1  # Si no hay cantidad, usar 1 por defecto
 
-    # Verificar la acción (incrementar o decrementar)
-    if request.POST.get('accion') == 'incrementar':
-        item.cantidad += cantidad  # Incrementar el stock
-        messages.success(
-            request, 
-            f'Se ha aumentado el stock de "{item.descripcion}" (Código: {item.codigo}) de {cantidad_anterior} a {item.cantidad}.'
-        )
-    elif request.POST.get('accion') == 'decrementar':
-        if item.cantidad >= cantidad:
-            item.cantidad -= cantidad  # Decrementar el stock
-            messages.success(
-                request, 
-                f'Se ha reducido el stock de "{item.descripcion}" (Código: {item.codigo}) de {cantidad_anterior} a {item.cantidad}.'
-            )
-        else:
-            messages.error(
-                request, 
-                f'No se puede reducir el stock de "{item.descripcion}" (Código: {item.codigo}) por debajo de 0. Stock actual: {item.cantidad}.'
-            )
-            return redirect('listar_stock')
+        # Almacenar la cantidad anterior antes de modificar
+        cantidad_anterior = item.cantidad
+        mensaje = ''
 
-    # Guardar los cambios en el modelo
-    item.save()
-    
-    return redirect('listar_stock')
+        # Caso 2: Incrementar o decrementar según la acción seleccionada
+        if request.POST.get('accion') == 'incrementar':
+            item.cantidad += cantidad  # Incrementar stock
+            mensaje = f"Se incrementó el stock de {item.descripcion} (Código: {item.codigo}) de {cantidad_anterior} a {item.cantidad}."
+        elif request.POST.get('accion') == 'decrementar':
+            if item.cantidad >= cantidad:
+                item.cantidad -= cantidad  # Decrementar stock si la cantidad es mayor o igual
+                mensaje = f"Se restó el stock de {item.descripcion} (Código: {item.codigo}) de {cantidad_anterior} a {item.cantidad}."
+            else:
+                return JsonResponse({'error': 'No se puede reducir más allá de 0.'}, status=400)
+
+        # Guardar los cambios en la base de datos
+        item.save()
+
+        # Devolver respuesta en formato JSON con los detalles
+        return JsonResponse({
+            'success': True,
+            'nueva_cantidad': item.cantidad,
+            'mensaje': mensaje,
+            'codigo': item.codigo,
+            'descripcion': item.descripcion,
+            'cantidad_anterior': cantidad_anterior,
+            'cantidad_nueva': item.cantidad
+        })
+
+    # Si no es método POST, devolver error de método no permitido
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
+
+
 
 
 
