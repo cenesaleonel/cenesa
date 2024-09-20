@@ -56,11 +56,11 @@ class PedidoAutorizacion(models.Model):
 
 #Para los valores 
 class ObraSocial(models.Model):
+    codigo = models.CharField(max_length=100, unique=True)
+    siglas = models.CharField(max_length=100, default='N/A') 
     nombre = models.CharField(max_length=255)
-    codigo = models.CharField(max_length=20)
-
     def __str__(self):
-        return self.nombre
+        return f"{self.nombre} ({self.siglas})"
 
 # carga de excel
 class ArchivoExcel(models.Model):

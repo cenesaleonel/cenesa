@@ -210,13 +210,43 @@ def eliminar_archivo_excel(request, id):
     
     return redirect('listar_archivos')
 
+#obra social
 
 
+
+from django.core.paginator import Paginator
+from django.contrib import messages
 @login_required
 @staff_member_required
 def listar_obras_sociales(request):
+    codigo_query = request.GET.get('codigo', '').strip()  # Filtro exacto por código
+    nombre_query = request.GET.get('nombre', '').strip()  # Filtro parcial por nombre
     obras_sociales = ObraSocial.objects.all()
-    return render(request, 'Valores/obra_social/listar_obras_sociales.html', {'obras_sociales': obras_sociales})
+
+    # Filtrar por código exacto si se proporciona
+    if codigo_query:
+        obras_sociales = obras_sociales.filter(codigo=codigo_query)
+        if not obras_sociales.exists():
+            messages.warning(request, f'No se encontraron resultados para el código "{codigo_query}".')
+
+    # Filtrar por nombre si se proporciona
+    if nombre_query:
+        obras_sociales = obras_sociales.filter(nombre__icontains=nombre_query)
+        if not obras_sociales.exists():
+            messages.warning(request, f'No se encontraron resultados para el nombre "{nombre_query}".')
+
+    # Paginación
+    paginator = Paginator(obras_sociales, 10)  # 10 resultados por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'Valores/obra_social/listar_obras_sociales.html', {
+        'obras_sociales': page_obj,  # Enviar objetos paginados
+        'codigo_query': codigo_query,  # Mantener el valor de búsqueda para el código
+        'nombre_query': nombre_query,  # Mantener el valor de búsqueda para el nombre
+        'page_obj': page_obj,  # Pasar la información de la página
+    })
+
 
 @login_required
 @staff_member_required
@@ -256,7 +286,132 @@ def eliminar_obra_social(request, id):
     return render(request, 'Valores/obra_social/eliminar_obra_social.html', {'obra_social': obra_social})
 
 
-# views.py
+
+import pandas as pd
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import CargaObraSocialForm
+from .models import ObraSocial
+
+def carga_obra_social_geclisa(request):
+    if request.method == 'POST':
+        form = CargaObraSocialForm(request.POST, request.FILES)
+        if form.is_valid():
+            archivo = request.FILES['archivo_excel']
+            
+            # Verificar si es un archivo .xls
+            if not archivo.name.endswith('.xls'):
+                messages.error(request, 'El archivo debe estar en formato Excel (.xls).')
+                return redirect('carga_obra_social_geclisa')
+
+            try:
+                # Leer el archivo Excel (para .xls, necesitamos 'xlrd')
+                df = pd.read_excel(archivo, engine='xlrd')
+
+                # Verificar que las columnas requeridas existan
+                required_columns = ['os_cod', 'os_sigla', 'os_nombre']
+                for col in required_columns:
+                    if col not in df.columns:
+                        messages.error(request, f"Falta la columna requerida: {col}")
+                        return redirect('carga_obra_social_geclisa')
+
+                # Procesar cada fila y guardar/actualizar en la base de datos
+                for _, row in df.iterrows():
+                    ObraSocial.objects.update_or_create(
+                        codigo=row['os_cod'],
+                        defaults={
+                            'siglas': row['os_sigla'],
+                            'nombre': row['os_nombre']
+                        }
+                    )
+                messages.success(request, 'Obras sociales cargadas correctamente.')
+                return redirect('listar_obras_sociales')
+
+            except Exception as e:
+                messages.error(request, f'Ocurrió un error al procesar el archivo: {e}')
+                return redirect('carga_obra_social_geclisa')
+
+    else:
+        form = CargaObraSocialForm()
+
+    return render(request, 'valores/obra_social/carga_obra_social_geclisa.html', {'form': form})
+
+
+import pandas as pd
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import UploadFileForm
+from .models import ObraSocial
+
+def carga_obra_social_estandar(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            archivo = request.FILES['archivo_excel']
+
+            try:
+                # Leer archivo Excel
+                df = pd.read_excel(archivo)
+
+                # Verificar que las columnas requeridas existan en el archivo
+                required_columns = ['Codigo', 'Siglas', 'Nombre']
+                for col in required_columns:
+                    if col not in df.columns:
+                        messages.error(request, f"El archivo Excel no contiene la columna: {col}")
+                        return redirect('carga_obra_social_estandar')
+
+                # Procesar cada fila y actualizar/crear la Obra Social
+                for _, row in df.iterrows():
+                    ObraSocial.objects.update_or_create(
+                        codigo=row['Codigo'],
+                        defaults={
+                            'siglas': row['Siglas'],
+                            'nombre': row['Nombre']
+                        }
+                    )
+
+                messages.success(request, 'Archivo cargado y procesado con éxito.')
+                return redirect('listar_obras_sociales')
+
+            except Exception as e:
+                messages.error(request, f"Ocurrió un error procesando el archivo: {str(e)}")
+                return redirect('carga_obra_social_estandar')
+
+    else:
+        form = UploadFileForm()
+    
+    return render(request, 'Valores/obra_social/carga_obra_social_estandar.html', {'form': form})
+
+import pandas as pd
+from django.http import HttpResponse
+from .models import ObraSocial
+
+def exportar_obra_social_estandar(request):
+    # Obtener todas las obras sociales de la base de datos
+    obras_sociales = ObraSocial.objects.all()
+
+    # Crear un DataFrame con los datos necesarios
+    data = {
+        'Codigo': [obra.codigo for obra in obras_sociales],
+        'Siglas': [obra.siglas for obra in obras_sociales],
+        'Nombre': [obra.nombre for obra in obras_sociales],
+    }
+    
+    df = pd.DataFrame(data)
+
+    # Crear un archivo Excel en memoria
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=obras_sociales_estandar.xlsx'
+
+    # Escribir el DataFrame en el archivo Excel
+    with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False)
+
+    return response
+
+
+
+#------------------------------------------------------------------------------------------------------------#
 
 import pandas as pd
 from django.shortcuts import render, get_object_or_404, redirect

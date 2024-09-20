@@ -56,6 +56,12 @@ class ObraSocialForm(forms.ModelForm):
             'codigo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código'}),
         }
         
+ 
+
+
+class CargaObraSocialForm(forms.Form):
+    archivo_excel = forms.FileField(label='Archivo Excel para cargar Obras Sociales Geclisa') 
+        
 class NovedadForm(forms.ModelForm):
     class Meta:
         model = Novedad
@@ -65,7 +71,8 @@ class NovedadForm(forms.ModelForm):
             'contenido': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Contenido de la novedad'}),
         }        
 
-
+class UploadFileForm(forms.Form):
+    archivo_excel = forms.FileField(label="Selecciona un archivo Excel")
 
 from django import forms
 from .models import Stock

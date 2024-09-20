@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import carga_obra_social_geclisa , carga_obra_social_estandar , exportar_obra_social_estandar
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -30,6 +31,11 @@ urlpatterns = [
     path('obras-sociales/crear/', views.crear_obra_social, name='crear_obra_social'),
     path('obras-sociales/editar/<int:id>/', views.editar_obra_social, name='editar_obra_social'),
     path('obras-sociales/eliminar/<int:id>/', views.eliminar_obra_social, name='eliminar_obra_social'),
+    path('carga-obra-social-geclisa/', carga_obra_social_geclisa, name='carga_obra_social_geclisa'),
+    path('carga-obra-social-estandar/', carga_obra_social_estandar, name='carga_obra_social_estandar'),
+    path('exportar-obra-social-estandar/', exportar_obra_social_estandar, name='exportar_obra_social_estandar'),
+
+
     
     path('carga-masiva/', views.carga_masiva_stock, name='carga_masiva_stock'),
     path('listar-stock/', views.listar_stock, name='listar_stock'),

@@ -1,28 +1,79 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Obras Sociales</h2>
-<a href="{% url 'crear_obra_social' %}" class="btn btn-success mb-3">Crear Nueva Obra Social</a>
+<div class="container mt-5">
+    <h2>Obras Sociales</h2>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Código</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for obra_social in obras_sociales %}
-        <tr>
-            <td>{{ obra_social.nombre }}</td>
-            <td>{{ obra_social.codigo }}</td>
-            <td>
-                <a href="{% url 'editar_obra_social' obra_social.id %}" class="btn btn-primary">Editar</a>
-                <a href="{% url 'eliminar_obra_social' obra_social.id %}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta obra social?')">Eliminar</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <!-- Formulario de búsqueda por código y nombre -->
+    <form method="get" class="mb-3">
+        <div class="row g-3">
+            <!-- Campo para buscar por código -->
+            <div class="col-md-4">
+                <input type="text" name="codigo" value="{{ codigo_query }}" class="form-control" placeholder="Buscar por código">
+            </div>
+            <!-- Campo para buscar por nombre -->
+            <div class="col-md-4">
+                <input type="text" name="nombre" value="{{ nombre_query }}" class="form-control" placeholder="Buscar por nombre">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+                <a href="{% url 'listar_obras_sociales' %}" class="btn btn-secondary">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Botón para crear una nueva obra social -->
+    <a href="{% url 'crear_obra_social' %}" class="btn btn-success mb-3">Crear Nueva Obra Social</a>
+
+    <!-- Botón con submenú para importar Obras Sociales/ART -->
+    <div class="btn-group mb-3">
+        <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Importar Obras Social/ART
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'carga_obra_social_geclisa' %}">Cargar Formato Geclisa</a></li>
+            <li><a class="dropdown-item" href="{% url 'carga_obra_social_estandar' %}">Cargar Formato Estándar</a></li>
+        </ul>
+    </div>
+
+    <!-- Tabla de resultados -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Código</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obra_social in obras_sociales %}
+            <tr>
+                <td>{{ obra_social.nombre }}</td>
+                <td>{{ obra_social.codigo }}</td>
+                <td>
+                    <a href="{% url 'editar_obra_social' obra_social.id %}" class="btn btn-primary">Editar</a>
+                    <a href="{% url 'eliminar_obra_social' obra_social.id %}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta obra social?')">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Paginación -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?codigo={{ codigo_query }}&nombre={{ nombre_query }}&page={{ page_obj.previous_page_number }}">Anterior</a>
+            </li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?codigo={{ codigo_query }}&nombre={{ nombre_query }}&page={{ page_obj.next_page_number }}">Siguiente</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
 {% endblock %}
