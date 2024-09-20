@@ -1,149 +1,190 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imprimir Stock</title>
-    {% load static %}
-    <style>
-        /* Estilos personalizados para la impresión */
-        @media print {
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                margin: 0;
-                padding: 0;
-                color: #000;
-            }
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Listado de Stock</h1>
+{% load static %}
 
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-            }
-
-            table, th, td {
-                border: 1px solid #d9d9d9;
-            }
-
-            th {
-                background-color: #4CAF50;
-                color: white;
-                padding: 10px;
-                text-align: center;
-                font-weight: bold;
-            }
-
-            td {
-                padding: 8px;
-                text-align: left;
-            }
-
-            tr:nth-child(even) {
-                background-color: #f2f2f2;
-            }
-
-            tr:hover {
-                background-color: #ddd;
-            }
-        }
-
-        /* Estilos generales para la vista normal */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f7f7f7;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        td {
-            padding: 8px;
-            text-align: left;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tr:hover {
-            background-color: #ddd;
-        }
-
-        /* Botón de impresión */
-        .btn-print {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-
-        .btn-print:hover {
-            background-color: #218838;
-        }
-
-        /* Aquí puedes agregar la imagen */
-        .header-image {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .header-image img {
-            width: 150px;  /* Puedes ajustar el tamaño según tus necesidades */
-            height: auto;
-        }
-    </style>
-</head>
-<body>
-    <div class="header-image">
-        <img src="{% static 'images/logoNV.jpg' %}" alt="Logo">
+    
+    <div class="text-center mb-4">
+        <img src="{% static 'images/logoNV.jpg' %}" alt="Logo" class="img-fluid" style="max-width: 150px;">
     </div>
+    <style>
+/* Estilos personalizados para la impresión */
+@media print {
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        color: #000;
+    }
 
-    <h1>Listado de estock</h1>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
 
-    <table>
-        <thead>
-            <tr>
-                <th>Código</th>
-                <th>Descripción</th>
-                <th>Depósito</th>
-                <th>Tipo de Elemento</th>
-                <th>Cantidad</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in stock_items %}
-            <tr>
-                <td>{{ item.codigo }}</td>
-                <td>{{ item.descripcion }}</td>
-                <td>{{ item.deposito }}</td>
-                <td>{{ item.tipo_elemento }}</td>
-                <td>{{ item.cantidad }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    table, th, td {
+        border: 1px solid #d9d9d9;
+    }
 
-    <!-- Botón para activar la impresión en pantalla -->
-    <button class="btn-print" onclick="window.print()">Imprimir</button>
-    <a href="{% url 'listar_stock' %}" class="btn btn-secondary">Volver</a>
-</body>
-</html>
+    th {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    td {
+        padding: 8px;
+        text-align: left;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #ddd;
+    }
+
+    /* Ocultar botones al imprimir */
+    .btn {
+        display: none;
+    }
+
+    /* Ajustar la imagen en la impresión */
+    .header-image img {
+        width: 150px;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+}
+
+/* Estilos generales para la vista normal con Bootstrap */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f7f7f7;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table th {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.table td {
+    padding: 8px;
+    text-align: left;
+}
+
+.table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table tr:hover {
+    background-color: #ddd;
+}
+
+/* Estilo para los botones */
+.btn-print, .btn-secondary {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    width: 150px;  /* Asegura que ambos botones tengan el mismo ancho */
+    text-align: center;
+}
+
+.btn-secondary {
+    background-color: #007bff; /* Color del botón de "Volver" */
+}
+
+.btn-print:hover, .btn-secondary:hover {
+    background-color: #218838;
+}
+
+.btn-secondary:hover {
+    background-color: #0056b3; /* Color al pasar el cursor sobre el botón de "Volver" */
+}
+
+/* Ajuste de la imagen en la cabecera */
+.header-image {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header-image img {
+    width: 150px; /* Puedes ajustar el tamaño según tus necesidades */
+    height: auto;
+}
+
+/* Centrando los botones de imprimir y volver */
+.btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Espacio entre los botones */
+    margin-top: 20px;
+}
+
+
+
+    </style>
+    <div class="btn-container">
+        <button class="btn-print" onclick="window.print()">Imprimir</button>
+        <a href="{% url 'listar_stock' %}" class="btn btn-secondary">Volver</a>
+    </div>
+    
+
+
+    
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Código</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Depósito</th>
+                    <th scope="col">Tipo de Elemento</th>
+                    <th scope="col">Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in stock_items %}
+                <tr>
+                    <td>{{ item.codigo }}</td>
+                    <td>{{ item.descripcion }}</td>
+                    <td>{{ item.deposito }}</td>
+                    <td>{{ item.tipo_elemento }}</td>
+                    <td>{{ item.cantidad }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="btn-container">
+        <button class="btn-print" onclick="window.print()">Imprimir</button>
+        <a href="{% url 'listar_stock' %}" class="btn btn-secondary">Volver</a>
+    </div>
+    
+
+    
+</div>
+
 {% endblock %}
 
 
