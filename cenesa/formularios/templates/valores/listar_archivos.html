@@ -21,21 +21,27 @@
                     <td>{{ archivo.archivo.name }}</td>
                     <td>{{ archivo.fecha_carga|date:"d M Y" }}</td>
                     <td>
+                        {% if request.user.perfilusuario.tipo_usuario.nombre in "admin facturacion" %}
                         <a href="{{ archivo.archivo.url }}" class="btn btn-info btn-sm" download>
                             <i class="fas fa-download"></i> Descargar
+                        {% endif %}
                         </a>
-
+                        {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
                         <a href="{% url 'procesar_excel' archivo.id %}" class="btn btn-warning btn-sm">
                             <i class="fas fa-cogs"></i> Procesar
+                        {% endif %}    
                         </a>
-
+                        {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
                         <a href="{% url 'exportar_valores_procesados' archivo.id %}" class="btn btn-success btn-sm">
                             <i class="fas fa-file-export"></i> Exportar
+                        {% endif %} 
                         </a>
-
+                        
                         <!-- Botón para eliminar el archivo con confirmación -->
+                        {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
                         <a href="{% url 'eliminar_archivo_excel' archivo.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este archivo? Esta acción no se puede deshacer.')">
                             <i class="fas fa-trash"></i> Eliminar
+                        {% endif %}     
                         </a>
                     </td>
                 </tr>

@@ -178,6 +178,7 @@ def rechazar_pedido_autorizacion(request, id):
 
 
 @login_required
+#NO PONER RESTRCCION YA QUE LOS USUARIOS COMUNES PUEDEN USAR ESTO #
 def eliminar_pedido_autorizacion(request, id):
     pedido = get_object_or_404(PedidoAutorizacion, id=id)
 
@@ -207,10 +208,38 @@ def eliminar_pedido_autorizacion(request, id):
 
     return render(request, 'solicitar/eliminar_pedido_autorizacion.html', {'pedido': pedido})
 
+# Editar una novedad
+@login_required
+@tipo_usuario_requerido('admin', 'rrhh')
+def editar_novedad(request, id):
+    novedad = get_object_or_404(Novedad, id=id)
+    if request.method == 'POST':
+        form = NovedadForm(request.POST, instance=novedad)
+        if form.is_valid():
+            form.save()
+            return redirect('home')  # Redirige al home
+    else:
+        form = NovedadForm(instance=novedad)
+    return render(request, 'novedades/editar_novedad.html', {'form': form, 'novedad': novedad})
+
+
+# Eliminar una novedad
+@login_required
+@tipo_usuario_requerido('admin', 'rrhh')
+def eliminar_novedad(request, id):
+    novedad = get_object_or_404(Novedad, id=id)
+    if request.method == 'POST':
+        novedad.delete()
+        return redirect('home')
+    return render(request, 'novedades/eliminar_novedad.html', {'novedad': novedad})
+
+
 #fin de Formularios----------------------------------------------------------------------------#
 
-@login_required
 
+#Comienzo de sector de facturacion.----------------------------------------------------------------#
+@login_required
+@tipo_usuario_requerido('admin','facturacion')
 def subir_excel(request):
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
@@ -225,12 +254,13 @@ def subir_excel(request):
 
 
 @login_required
+@tipo_usuario_requerido('admin','facturacion')
 def listar_archivos(request):
     archivos = ArchivoExcel.objects.all()
     return render(request, 'Valores/listar_archivos.html', {'archivos': archivos})
 
 @login_required
-
+@tipo_usuario_requerido('admin')
 def eliminar_archivo_excel(request, id):
     archivo = get_object_or_404(ArchivoExcel, id=id)
     
@@ -260,6 +290,7 @@ def eliminar_archivo_excel(request, id):
 from django.core.paginator import Paginator
 from django.contrib import messages
 @login_required
+@tipo_usuario_requerido('admin','facturacion')
 def listar_obras_sociales(request):
     codigo_query = request.GET.get('codigo', '').strip()  # Filtro exacto por código
     nombre_query = request.GET.get('nombre', '').strip()  # Filtro parcial por nombre
@@ -291,6 +322,7 @@ def listar_obras_sociales(request):
 
 
 @login_required
+@tipo_usuario_requerido('admin','facturacion')
 def crear_obra_social(request):
     if request.method == 'POST':
         form = ObraSocialForm(request.POST)
@@ -303,7 +335,7 @@ def crear_obra_social(request):
     return render(request, 'Valores/obra_social/crear_obra_social.html', {'form': form})
 
 @login_required
-
+@tipo_usuario_requerido('admin', 'facturacion')
 def editar_obra_social(request, id):
     obra_social = get_object_or_404(ObraSocial, id=id)
     if request.method == 'POST':
@@ -317,7 +349,7 @@ def editar_obra_social(request, id):
     return render(request, 'Valores/obra_social/editar_obra_social.html', {'form': form})
 
 @login_required
-
+@tipo_usuario_requerido('admin')
 def eliminar_obra_social(request, id):
     obra_social = get_object_or_404(ObraSocial, id=id)
     if request.method == 'POST':
@@ -334,7 +366,7 @@ from django.contrib import messages
 from .forms import CargaObraSocialForm
 from .models import ObraSocial
 @login_required
-
+@tipo_usuario_requerido('admin')
 def carga_obra_social_geclisa(request):
     if request.method == 'POST':
         form = CargaObraSocialForm(request.POST, request.FILES)
@@ -385,7 +417,7 @@ from django.contrib import messages
 from .forms import UploadFileForm
 from .models import ObraSocial
 @login_required
-
+@tipo_usuario_requerido('admin')
 def carga_obra_social_estandar(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -429,7 +461,7 @@ import pandas as pd
 from django.http import HttpResponse
 from .models import ObraSocial
 @login_required
-
+@tipo_usuario_requerido('admin')
 def exportar_obra_social_estandar(request):
     # Obtener todas las obras sociales de la base de datos
     obras_sociales = ObraSocial.objects.all()
@@ -455,7 +487,6 @@ def exportar_obra_social_estandar(request):
 
 
 
-#------------------------------------------------------------------------------------------------------------#
 
 import pandas as pd
 from django.shortcuts import render, get_object_or_404, redirect
@@ -464,7 +495,7 @@ from .models import ArchivoExcel
 from django.contrib import messages
 
 @login_required
-
+@tipo_usuario_requerido('admin')
 def procesar_excel(request, id):
     archivo = get_object_or_404(ArchivoExcel, id=id)
 
@@ -515,7 +546,7 @@ from .models import ArchivoExcel
 from django.shortcuts import get_object_or_404
 from io import BytesIO
 @login_required
-
+@tipo_usuario_requerido('admin')
 def exportar_valores_procesados(request, id):
     archivo = get_object_or_404(ArchivoExcel, id=id)
 
@@ -564,34 +595,11 @@ def exportar_valores_procesados(request, id):
         # Si el archivo no es un Excel, se puede redirigir o mostrar un error
         return HttpResponse("El archivo no es un Excel válido.")
 
+#-----------------------FIn proceso de facturacion ---------------------------------------------------------------------------#
 
 
 
 
-# Editar una novedad
-@login_required
-
-def editar_novedad(request, id):
-    novedad = get_object_or_404(Novedad, id=id)
-    if request.method == 'POST':
-        form = NovedadForm(request.POST, instance=novedad)
-        if form.is_valid():
-            form.save()
-            return redirect('home')  # Redirige al home
-    else:
-        form = NovedadForm(instance=novedad)
-    return render(request, 'novedades/editar_novedad.html', {'form': form, 'novedad': novedad})
-
-
-# Eliminar una novedad
-@login_required
-
-def eliminar_novedad(request, id):
-    novedad = get_object_or_404(Novedad, id=id)
-    if request.method == 'POST':
-        novedad.delete()
-        return redirect('home')
-    return render(request, 'novedades/eliminar_novedad.html', {'novedad': novedad})
 
 
 

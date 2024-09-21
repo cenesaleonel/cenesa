@@ -37,39 +37,44 @@
                         </li>
                         
                         <li class="nav-item">
-                        
+                            {% if request.user.perfilusuario.tipo_usuario.nombre in "admin rrhh" %}
                                 <a class="nav-link" href="{% url 'crear_novedad' %}">Crear Novedad</a>
-                        
+                            {% endif %}
                         </li>
                         <li class="nav-item">
-                        
-                                <a class="nav-link" href="{% url 'listar_stock' %}">Farmacia</a>
+                            {% if request.user.perfilusuario.tipo_usuario.nombre in "admin farmacia" %}
+                            <a class="nav-link" href="{% url 'listar_stock' %}">Farmacia</a>
+                            {% endif %}
                         
                         </li>
                         
 
                         <!-- Submenú desplegable para Formularios -->
                         <li class="nav-item dropdown">
+                            {% if request.user.perfilusuario.tipo_usuario.nombre in "admin rrhh" %}
                             <a class="nav-link dropdown-toggle" href="#" id="formulariosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Formularios
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="formulariosDropdown">
                                 <li><a class="dropdown-item" href="{% url 'listar_pedidos_autorizacion' %}">Autorizaciones</a></li>
                                 <li><a class="dropdown-item" href="{% url 'listar_formularios' %}">Formularios</a></li>
+                            {% endif %}
                             </ul>
                         </li>
 
                         <!-- Submenú desplegable para Obras Sociales -->
                         
                         <li class="nav-item dropdown">
+                            {% if request.user.perfilusuario.tipo_usuario.nombre in "admin facturacion" %}
                             <a class="nav-link dropdown-toggle" href="#" id="obrasSocialesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Obras Sociales
+                                Facturación
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="obrasSocialesDropdown">
                                 <li><a class="dropdown-item" href="{% url 'listar_obras_sociales' %}">Obras Sociales</a></li>
+                                
                                 <li><a class="dropdown-item" href="{% url 'subir_excel' %}">Carga de Valores Prestacionales</a></li>
                                 <li><a class="dropdown-item" href="{% url 'listar_archivos' %}">Listado de Valores Cargados</a></li>
-                                
+                            {% endif %}
                             </ul>
                         </li>
                     </ul>
