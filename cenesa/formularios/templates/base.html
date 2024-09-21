@@ -31,20 +31,20 @@
                         <!-- Mostrar solo si el usuario es staff o superusuario -->
                         
                         <li class="nav-item">
-                            {% if request.user.is_staff or request.user.is_superuser or request.user.tipo_usuario == 'admin' %}
+                            {% if request.user.is_staff and request.user.is_superuser  %}
                                 <a class="nav-link" href="/admin/">Administración</a>
                             {% endif %}
                         </li>
                         
                         <li class="nav-item">
-                            {% if request.user.is_staff or request.user.is_superuser or request.user.tipo_usuario in ['rrhh', 'admin'] %}
+                        
                                 <a class="nav-link" href="{% url 'crear_novedad' %}">Crear Novedad</a>
-                            {% endif %}
+                        
                         </li>
                         <li class="nav-item">
-                            {% if request.user.is_staff or request.user.is_superuser or request.user.tipo_usuario in ['farmacia', 'admin'] %}
+                        
                                 <a class="nav-link" href="{% url 'listar_stock' %}">Farmacia</a>
-                            {% endif %}
+                        
                         </li>
                         
 
@@ -60,7 +60,7 @@
                         </li>
 
                         <!-- Submenú desplegable para Obras Sociales -->
-                        {% if request.user.is_staff or request.user.is_superuser or request.user.tipo_usuario in ['facturacion', 'admin'] %}
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="obrasSocialesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Obras Sociales
@@ -69,7 +69,7 @@
                                 <li><a class="dropdown-item" href="{% url 'listar_obras_sociales' %}">Obras Sociales</a></li>
                                 <li><a class="dropdown-item" href="{% url 'subir_excel' %}">Carga de Valores Prestacionales</a></li>
                                 <li><a class="dropdown-item" href="{% url 'listar_archivos' %}">Listado de Valores Cargados</a></li>
-                                {% endif %}
+                                
                             </ul>
                         </li>
                     </ul>
