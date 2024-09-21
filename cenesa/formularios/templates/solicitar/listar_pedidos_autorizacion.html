@@ -25,13 +25,18 @@
                         <!-- Botón para ver la solicitud -->
                         <a href="{% url 'ver_pedido_autorizacion' pedido.id %}" class="btn btn-info">Ver Solicitud</a>
 
-                        {% if pedido.estado == 'pendiente' and user.is_staff %}
+                        {% if pedido.estado == 'pendiente' and request.user.perfilusuario.tipo_usuario.nombre in "admin rrhh" %}
                         <a href="{% url 'aprobar_pedido_autorizacion' pedido.id %}" class="btn btn-success">Aprobar</a>
                         <a href="{% url 'rechazar_pedido_autorizacion' pedido.id %}" class="btn btn-danger">Rechazar</a>
                         {% endif %}
+
                         
-                        {% if user.is_staff %}
-                        <a href="{% url 'eliminar_pedido_autorizacion' pedido.id %}" class="btn btn-warning" onclick="return confirm('¿Estás seguro de que deseas eliminar esta solicitud? Esta acción no se puede deshacer.')">Eliminar</a>
+                        {% if request.user.perfilusuario.tipo_usuario.nombre in "admin rrhh" %}
+                        <a href="{% url 'eliminar_pedido_autorizacion' pedido.id %}" class="btn btn-warning" 
+                        onclick="return confirm('¿Estás seguro de que deseas eliminar esta solicitud? Esta acción no se puede deshacer.')">Eliminar</a>
+                        {% elif  pedido.estado == 'pendiente' and request.user == pedido.usuario %}
+                        <a href="{% url 'eliminar_pedido_autorizacion' pedido.id %}" class="btn btn-warning" 
+                        onclick="return confirm('¿Estás seguro de que deseas eliminar esta solicitud? Esta acción no se puede deshacer.')">Eliminar</a>
                         {% endif %}
                     </td>
                 </tr>

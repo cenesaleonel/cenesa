@@ -17,21 +17,28 @@ from .forms import ObraSocialForm
 from .models import Novedad
 from .forms import NovedadForm
 from functools import wraps
+from django.http import HttpResponseForbidden
+from .models import PerfilUsuario
 
-def staff_member_required(function):
-    @wraps(function)
-    @login_required
-    def wrap(request, *args, **kwargs):
-        if request.user.is_staff:
-            return function(request, *args, **kwargs)
-        else:
-            # Mostrar un mensaje de error si no tiene permisos
-            messages.error(request, "Usted no tiene permiso para realizar esta acción. Contacte al administrador.")
+#@tipo_usuario_requerido('admin', 'editor')# Esto vamos a usar para definir las restricciones. rrhh
+	#Esto son la lista  de tipo de usuarios por ahora: #facturacion #tesoreria #gerencia #personal #framacia #admin
+
+def tipo_usuario_requerido(*tipos_usuarios):
+    def decorator(func):
+        @wraps(func)
+        def wrap(request, *args, **kwargs):
+            # Obtener el perfil del usuario
+            perfil = PerfilUsuario.objects.filter(usuario=request.user).first()
             
-            # Redirigir siempre a 'home' en caso de no tener permisos
-            return redirect('home')
-            
-    return wrap
+            # Verificar si el perfil del usuario coincide con alguno de los tipos permitidos
+            if perfil and perfil.tipo_usuario.nombre in tipos_usuarios:
+                return func(request, *args, **kwargs)
+            else:
+                # Mostrar un mensaje de error y redirigir a la página 'home'
+                messages.error(request, "No tienes permiso para acceder a esta página.")
+                return redirect('home')
+        return wrap
+    return decorator
 
 # Vista Home
 @login_required
@@ -40,7 +47,7 @@ def home(request):
     return render(request, 'home.html', {'novedades': novedades})
 
 @login_required
-@staff_member_required
+@tipo_usuario_requerido('admin', 'rrhh')
 def crear_novedad(request):
     if request.method == 'POST':
         form = NovedadForm(request.POST)
@@ -57,8 +64,8 @@ def listar_usuarios(request):
     usuarios = User.objects.all()
     return render(request, 'usuarios/listar_usuarios.html', {'usuarios': usuarios})
 
+@tipo_usuario_requerido('admin', 'rrhh')
 @login_required
-@staff_member_required
 def crear_formulario(request):
     if request.method == 'POST':
         form = FormularioForm(request.POST, request.FILES)
@@ -79,7 +86,7 @@ def ver_formulario(request, id):
     formulario = get_object_or_404(Formulario, id=id)
     return render(request, 'formularios/ver_formulario.html', {'formulario': formulario})
 
-@staff_member_required
+@tipo_usuario_requerido('admin', 'rrhh')
 @login_required
 def eliminar_formulario(request, id):
     formulario = get_object_or_404(Formulario, id=id)
@@ -131,8 +138,14 @@ def subir_pdf_rellenado(request):
 
 @login_required
 def listar_pedidos_autorizacion(request):
-    # Si el usuario es staff, muestra todos los pedidos, de lo contrario, solo los del usuario actual
-    if request.user.is_staff:
+    # Obtener el perfil del usuario para verificar su tipo
+    perfil_usuario = PerfilUsuario.objects.filter(usuario=request.user).first()
+    
+    # Verificar si el usuario es admin o rrhh
+    es_admin_o_rrhh = perfil_usuario and perfil_usuario.tipo_usuario.nombre in ['admin', 'rrhh']
+
+    # Si es admin o rrhh, mostrar todos los pedidos, de lo contrario, solo los del usuario actual
+    if es_admin_o_rrhh:
         pedidos = PedidoAutorizacion.objects.all()  # Mostrar todos los pedidos
     else:
         pedidos = PedidoAutorizacion.objects.filter(usuario=request.user)  # Mostrar solo los pedidos del usuario actual
@@ -148,7 +161,7 @@ def ver_pedido_autorizacion(request, id):
 
 
 @login_required
-@staff_member_required
+@tipo_usuario_requerido('admin', 'rrhh')
 def aprobar_pedido_autorizacion(request, id):
     pedido = get_object_or_404(PedidoAutorizacion, id=id)
     pedido.estado = PedidoAutorizacion.SOLICITUD_APROBADA
@@ -156,7 +169,7 @@ def aprobar_pedido_autorizacion(request, id):
     return redirect('listar_pedidos_autorizacion')
 
 @login_required
-@staff_member_required
+@tipo_usuario_requerido('admin', 'rrhh')
 def rechazar_pedido_autorizacion(request, id):
     pedido = get_object_or_404(PedidoAutorizacion, id=id)
     pedido.estado = PedidoAutorizacion.SOLICITUD_RECHAZADA
@@ -165,26 +178,39 @@ def rechazar_pedido_autorizacion(request, id):
 
 
 @login_required
-@staff_member_required
 def eliminar_pedido_autorizacion(request, id):
-    pedido = get_object_or_404(PedidoAutorizacion, id=id, usuario=request.user)
-    
-    if request.method == 'POST':
-        # Eliminar el PDF del sistema de archivos
-        if pedido.pdf_solicitud and os.path.isfile(pedido.pdf_solicitud.path):
-            os.remove(pedido.pdf_solicitud.path)
-        
-        # Eliminar el pedido de autorización
-        pedido.delete()
-        
+    pedido = get_object_or_404(PedidoAutorizacion, id=id)
+
+    # Verificar si el usuario es el propietario del pedido o si es admin/rrhh
+    es_dueno = pedido.usuario == request.user
+    perfil_usuario = PerfilUsuario.objects.filter(usuario=request.user).first()
+    es_admin_o_rrhh = perfil_usuario and perfil_usuario.tipo_usuario.nombre in ['admin', 'rrhh']
+
+    # Solo permitir a admin o rrhh eliminar pedidos aprobados/rechazados
+    if not es_admin_o_rrhh and pedido.estado in [PedidoAutorizacion.SOLICITUD_APROBADA, PedidoAutorizacion.SOLICITUD_RECHAZADA]:
+        messages.error(request, 'No puedes eliminar un pedido que ha sido aprobado o rechazado.')
         return redirect('listar_pedidos_autorizacion')
+
+    # Permitir que los usuarios normales solo eliminen pedidos en estado pendiente
+    if es_dueno or es_admin_o_rrhh:
+        if request.method == 'POST':
+            # Eliminar el PDF del sistema de archivos
+            if pedido.pdf_solicitud and os.path.isfile(pedido.pdf_solicitud.path):
+                os.remove(pedido.pdf_solicitud.path)
+
+            # Eliminar el pedido de autorización
+            pedido.delete()
+            messages.success(request, 'El pedido de autorización ha sido eliminado correctamente.')
+            return redirect('listar_pedidos_autorizacion')
+    else:
+        messages.error(request, 'No tienes permiso para eliminar este pedido.')
 
     return render(request, 'solicitar/eliminar_pedido_autorizacion.html', {'pedido': pedido})
 
-
+#fin de Formularios----------------------------------------------------------------------------#
 
 @login_required
-@staff_member_required
+
 def subir_excel(request):
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
@@ -204,7 +230,7 @@ def listar_archivos(request):
     return render(request, 'Valores/listar_archivos.html', {'archivos': archivos})
 
 @login_required
-@staff_member_required
+
 def eliminar_archivo_excel(request, id):
     archivo = get_object_or_404(ArchivoExcel, id=id)
     
@@ -277,7 +303,7 @@ def crear_obra_social(request):
     return render(request, 'Valores/obra_social/crear_obra_social.html', {'form': form})
 
 @login_required
-@staff_member_required
+
 def editar_obra_social(request, id):
     obra_social = get_object_or_404(ObraSocial, id=id)
     if request.method == 'POST':
@@ -291,7 +317,7 @@ def editar_obra_social(request, id):
     return render(request, 'Valores/obra_social/editar_obra_social.html', {'form': form})
 
 @login_required
-@staff_member_required
+
 def eliminar_obra_social(request, id):
     obra_social = get_object_or_404(ObraSocial, id=id)
     if request.method == 'POST':
@@ -308,7 +334,7 @@ from django.contrib import messages
 from .forms import CargaObraSocialForm
 from .models import ObraSocial
 @login_required
-@staff_member_required
+
 def carga_obra_social_geclisa(request):
     if request.method == 'POST':
         form = CargaObraSocialForm(request.POST, request.FILES)
@@ -359,7 +385,7 @@ from django.contrib import messages
 from .forms import UploadFileForm
 from .models import ObraSocial
 @login_required
-@staff_member_required
+
 def carga_obra_social_estandar(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -403,7 +429,7 @@ import pandas as pd
 from django.http import HttpResponse
 from .models import ObraSocial
 @login_required
-@staff_member_required
+
 def exportar_obra_social_estandar(request):
     # Obtener todas las obras sociales de la base de datos
     obras_sociales = ObraSocial.objects.all()
@@ -438,7 +464,7 @@ from .models import ArchivoExcel
 from django.contrib import messages
 
 @login_required
-@staff_member_required
+
 def procesar_excel(request, id):
     archivo = get_object_or_404(ArchivoExcel, id=id)
 
@@ -489,7 +515,7 @@ from .models import ArchivoExcel
 from django.shortcuts import get_object_or_404
 from io import BytesIO
 @login_required
-@staff_member_required
+
 def exportar_valores_procesados(request, id):
     archivo = get_object_or_404(ArchivoExcel, id=id)
 
@@ -544,7 +570,7 @@ def exportar_valores_procesados(request, id):
 
 # Editar una novedad
 @login_required
-@staff_member_required
+
 def editar_novedad(request, id):
     novedad = get_object_or_404(Novedad, id=id)
     if request.method == 'POST':
@@ -559,7 +585,7 @@ def editar_novedad(request, id):
 
 # Eliminar una novedad
 @login_required
-@staff_member_required
+
 def eliminar_novedad(request, id):
     novedad = get_object_or_404(Novedad, id=id)
     if request.method == 'POST':
@@ -698,7 +724,7 @@ from .models import Stock
 
 # Vista para eliminar un producto
 @login_required
-@staff_member_required
+
 def eliminar_producto(request, codigo):
     if request.method == 'POST':
         producto = get_object_or_404(Stock, codigo=codigo)
@@ -754,7 +780,7 @@ def descargar_stock(request):
 
 from django.contrib import messages
 @login_required
-@staff_member_required
+
 def volver_stock_a_cero(request):
     if request.method == 'POST':
         # Proceso de validación: preguntar al usuario si está seguro
@@ -769,7 +795,7 @@ def volver_stock_a_cero(request):
     return render(request, 'farmacia/confirmar_volver_stock_a_cero.html')
 
 @login_required
-@staff_member_required
+
 def eliminar_stock(request):
     if request.method == 'POST':
         # Proceso de validación: preguntar al usuario si está seguro
