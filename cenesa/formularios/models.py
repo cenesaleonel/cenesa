@@ -82,11 +82,13 @@ class ObraSocial(models.Model):
     def __str__(self):
         return f"{self.nombre} ({self.siglas})"
 
-# carga de excel
+# carga de excel facturacion.
 class ArchivoExcel(models.Model):
     obra_social = models.ForeignKey(ObraSocial, on_delete=models.CASCADE, related_name="archivos")
     archivo = models.FileField(upload_to='media/excel')
     fecha_carga = models.DateField(auto_now_add=True)
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)  # Registro del usuario que carga el archivo
+    procesado = models.BooleanField(default=False)  # Campo para saber si ya se ha procesado
 
     def __str__(self):
         return f"Archivo {self.archivo.name} - {self.obra_social.nombre} ({self.fecha_carga})"

@@ -253,11 +253,45 @@ def subir_excel(request):
     return render(request, 'Valores/subir_excel.html', {'form': form})
 
 
+from django.core.paginator import Paginator
+
 @login_required
-@tipo_usuario_requerido('admin','facturacion')
+@tipo_usuario_requerido('admin', 'facturacion')
 def listar_archivos(request):
+    # Obtener los parámetros de filtrado desde la URL (si existen)
+    obra_social_query = request.GET.get('obra_social', '').strip()  # Filtro por obra social
+    usuario_query = request.GET.get('usuario', '').strip()  # Filtro por nombre del usuario que cargó
+    fecha_query = request.GET.get('fecha', '').strip()  # Filtro por fecha de carga (formato: YYYY-MM-DD)
+
+    # Obtener todos los archivos
     archivos = ArchivoExcel.objects.all()
-    return render(request, 'Valores/listar_archivos.html', {'archivos': archivos})
+
+    # Filtrar por obra social si se proporciona
+    if obra_social_query:
+        archivos = archivos.filter(obra_social__nombre__icontains=obra_social_query)
+
+    # Filtrar por usuario si se proporciona
+    if usuario_query:
+        archivos = archivos.filter(usuario__username__icontains=usuario_query)
+
+    # Filtrar por fecha si se proporciona (asumiendo formato YYYY-MM-DD)
+    if fecha_query:
+        archivos = archivos.filter(fecha_carga=fecha_query)
+
+    # Paginación: 10 archivos por página
+    paginator = Paginator(archivos, 10)  # Muestra 10 archivos por página
+    page_number = request.GET.get('page')  # Obtener el número de página actual
+    page_obj = paginator.get_page(page_number)  # Obtener la página de archivos
+
+    # Renderizar la vista con los resultados filtrados y paginados
+    return render(request, 'Valores/listar_archivos.html', {
+        'archivos': page_obj,  # Pasamos solo los archivos de la página actual
+        'obra_social_query': obra_social_query,  # Mantener los filtros actuales en el contexto
+        'usuario_query': usuario_query,
+        'fecha_query': fecha_query,
+        'page_obj': page_obj  # Información de la paginación
+    })
+
 
 @login_required
 @tipo_usuario_requerido('admin')
