@@ -1,6 +1,15 @@
 from django import forms
 from .models import PedidoAutorizacion, Formulario ,  Novedad
 from .models import ObraSocial
+from django.contrib.auth.models import User
+from .models import PerfilUsuario, TipoUsuario
+
+class EditarPerfilForm(forms.ModelForm):
+    tipo_usuario = forms.ModelChoiceField(queryset=TipoUsuario.objects.all(), required=True)
+
+    class Meta:
+        model = PerfilUsuario
+        fields = ['tipo_usuario']
 
 class FormularioForm(forms.ModelForm):
     class Meta:

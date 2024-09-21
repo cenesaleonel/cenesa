@@ -6,3 +6,9 @@ def alguna_vista(request):
     # Lógica para usuarios admin...
 
 
+from django.contrib import admin
+from .models import TipoUsuario, PerfilUsuario
+
+# Registrar los modelos en el administrador de Django
+admin.site.register(TipoUsuario)
+admin.site.register(PerfilUsuario)

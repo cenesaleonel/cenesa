@@ -5,6 +5,26 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 
+
+
+class TipoUsuario(models.Model):
+    nombre = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.nombre
+
+# Opcionalmente, puedes extender el usuario para vincularlo con el tipo de usuario
+class PerfilUsuario(models.Model):
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    tipo_usuario = models.ForeignKey(TipoUsuario, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.tipo_usuario.nombre}"
+
+
+
+
+
 class Formulario(models.Model):
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField()
