@@ -31,8 +31,11 @@
                         <!-- Mostrar solo si el usuario es staff o superusuario -->
                         
                         <li class="nav-item">
-                            <a class="nav-link" href="/admin/">Administración</a>
+                            {% if request.user.is_staff or request.user.is_superuser %}
+                                <a class="nav-link" href="/admin/">Administración</a>
+                            {% endif %}
                         </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'crear_novedad' %}">Crear Novedad</a>
                         </li>
@@ -88,26 +91,27 @@
     <!-- Contenido dinámico -->
     <main class="container mt-5">
         {% block content %}
+        <div class="modal fade" id="modalSinPermisos" tabindex="-1" role="dialog" aria-labelledby="modalSinPermisosLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalSinPermisosLabel">Acción no permitida</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Usted no tiene permiso para realizar esta acción. Contacte al administrador.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endblock %}
     </main>
     
     <!-- Modal de permiso denegado -->
-    <div class="modal fade" id="modalSinPermisos" tabindex="-1" role="dialog" aria-labelledby="modalSinPermisosLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalSinPermisosLabel">Acción no permitida</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Usted no tiene permiso para realizar esta acción. Contacte al administrador.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+   
 
     <!-- Bootstrap JS y Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
