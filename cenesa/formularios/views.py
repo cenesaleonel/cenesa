@@ -16,7 +16,22 @@ from .models import ObraSocial
 from .forms import ObraSocialForm
 from .models import Novedad
 from .forms import NovedadForm
+from functools import wraps
 
+def staff_member_required(function):
+    @wraps(function)
+    @login_required
+    def wrap(request, *args, **kwargs):
+        if request.user.is_staff:
+            return function(request, *args, **kwargs)
+        else:
+            # Mostrar un mensaje de error si no tiene permisos
+            messages.error(request, "Usted no tiene permiso para realizar esta acción. Contacte al administrador.")
+            
+            # Redirigir siempre a 'home' en caso de no tener permisos
+            return redirect('home')
+            
+    return wrap
 
 # Vista Home
 @login_required
@@ -25,6 +40,7 @@ def home(request):
     return render(request, 'home.html', {'novedades': novedades})
 
 @login_required
+@staff_member_required
 def crear_novedad(request):
     if request.method == 'POST':
         form = NovedadForm(request.POST)
@@ -42,6 +58,7 @@ def listar_usuarios(request):
     return render(request, 'usuarios/listar_usuarios.html', {'usuarios': usuarios})
 
 @login_required
+@staff_member_required
 def crear_formulario(request):
     if request.method == 'POST':
         form = FormularioForm(request.POST, request.FILES)
@@ -62,6 +79,7 @@ def ver_formulario(request, id):
     formulario = get_object_or_404(Formulario, id=id)
     return render(request, 'formularios/ver_formulario.html', {'formulario': formulario})
 
+@staff_member_required
 @login_required
 def eliminar_formulario(request, id):
     formulario = get_object_or_404(Formulario, id=id)
@@ -181,7 +199,6 @@ def subir_excel(request):
 
 
 @login_required
-@staff_member_required
 def listar_archivos(request):
     archivos = ArchivoExcel.objects.all()
     return render(request, 'Valores/listar_archivos.html', {'archivos': archivos})
@@ -217,7 +234,6 @@ def eliminar_archivo_excel(request, id):
 from django.core.paginator import Paginator
 from django.contrib import messages
 @login_required
-@staff_member_required
 def listar_obras_sociales(request):
     codigo_query = request.GET.get('codigo', '').strip()  # Filtro exacto por código
     nombre_query = request.GET.get('nombre', '').strip()  # Filtro parcial por nombre
@@ -249,7 +265,6 @@ def listar_obras_sociales(request):
 
 
 @login_required
-@staff_member_required
 def crear_obra_social(request):
     if request.method == 'POST':
         form = ObraSocialForm(request.POST)
@@ -292,7 +307,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import CargaObraSocialForm
 from .models import ObraSocial
-
+@login_required
+@staff_member_required
 def carga_obra_social_geclisa(request):
     if request.method == 'POST':
         form = CargaObraSocialForm(request.POST, request.FILES)
@@ -342,7 +358,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UploadFileForm
 from .models import ObraSocial
-
+@login_required
+@staff_member_required
 def carga_obra_social_estandar(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -385,7 +402,8 @@ def carga_obra_social_estandar(request):
 import pandas as pd
 from django.http import HttpResponse
 from .models import ObraSocial
-
+@login_required
+@staff_member_required
 def exportar_obra_social_estandar(request):
     # Obtener todas las obras sociales de la base de datos
     obras_sociales = ObraSocial.objects.all()
@@ -559,7 +577,7 @@ from django.contrib import messages
 from .models import Stock
 from .forms import UploadStockForm, StockForm
 
-
+@login_required
 def carga_masiva_stock(request):
     if request.method == 'POST':
         form = UploadStockForm(request.POST, request.FILES)
@@ -612,7 +630,7 @@ def carga_masiva_stock(request):
 
 from django.core.paginator import Paginator
 from django.db.models import Q
-
+@login_required
 def listar_stock(request):
     # Obtener los valores del filtro desde el request GET
     filtro_codigo = request.GET.get('codigo', '')
@@ -648,6 +666,7 @@ def listar_stock(request):
 
 
 # Vista para agregar un nuevo producto
+@login_required
 def agregar_producto(request):
     if request.method == 'POST':
         form = StockForm(request.POST)
@@ -660,6 +679,7 @@ def agregar_producto(request):
 
 
 # Vista para editar un producto existente
+@login_required
 def editar_producto(request, codigo):
     producto = get_object_or_404(Stock, codigo=codigo)
     if request.method == 'POST':
@@ -677,6 +697,8 @@ from django.shortcuts import get_object_or_404
 from .models import Stock
 
 # Vista para eliminar un producto
+@login_required
+@staff_member_required
 def eliminar_producto(request, codigo):
     if request.method == 'POST':
         producto = get_object_or_404(Stock, codigo=codigo)
@@ -702,7 +724,7 @@ def eliminar_producto(request, codigo):
 import pandas as pd
 from django.http import HttpResponse
 from .models import Stock
-
+@login_required
 def descargar_stock(request):
     # Obtener todos los productos del stock
     stock_items = Stock.objects.all()
@@ -731,7 +753,8 @@ def descargar_stock(request):
 
 
 from django.contrib import messages
-
+@login_required
+@staff_member_required
 def volver_stock_a_cero(request):
     if request.method == 'POST':
         # Proceso de validación: preguntar al usuario si está seguro
@@ -745,7 +768,8 @@ def volver_stock_a_cero(request):
     
     return render(request, 'farmacia/confirmar_volver_stock_a_cero.html')
 
-
+@login_required
+@staff_member_required
 def eliminar_stock(request):
     if request.method == 'POST':
         # Proceso de validación: preguntar al usuario si está seguro
@@ -766,7 +790,7 @@ from .models import Stock
 from .forms import SubirArchivoExcelForm
 import pandas as pd
 import os
-
+@login_required
 def actualizar_inventario(request):
     if request.method == 'POST':
         form = SubirArchivoExcelForm(request.POST, request.FILES)
@@ -858,7 +882,7 @@ def actualizar_inventario(request):
 import pandas as pd
 from django.http import HttpResponse
 from .models import Stock  # Asegúrate de tener el modelo correcto para el inventario
-
+@login_required
 def descargar_inventario(request):
     # Obtener todos los productos del inventario
     stock_items = Stock.objects.all()
@@ -885,7 +909,7 @@ def descargar_inventario(request):
     return response
 
 
-
+@login_required
 def descargar_estructura_excel(request):
     # Crear un DataFrame con la estructura del Excel de importación
     data = {
@@ -916,7 +940,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
 from django.http import HttpResponse
 from .models import Stock
-
+@login_required
 def descargar_stock_pdf(request):
     # Configurar el archivo PDF de respuesta
     response = HttpResponse(content_type='application/pdf')
@@ -981,7 +1005,7 @@ import pdfkit # Si deseas exportar a PDF, puedes usar esta librería o una simil
 from django.core.paginator import Paginator
 from .models import Stock
 
-
+@login_required
 def imprimir_stock(request):
     # Obtener los valores del filtro desde el request GET
     filtro_codigo = request.GET.get('codigo', '')
@@ -1028,6 +1052,7 @@ from django.shortcuts import get_object_or_404
 from .models import Stock
 
 # Función para modificar el stock
+@login_required
 def modificar_stock(request, codigo):
     if request.method == 'POST':
         item = get_object_or_404(Stock, codigo=codigo)
@@ -1073,7 +1098,7 @@ def modificar_stock(request, codigo):
 
 
 
-
+@login_required
 def carga_formato_geclisa(request):
     if request.method == 'POST':
         form = UploadStockForm(request.POST, request.FILES)
