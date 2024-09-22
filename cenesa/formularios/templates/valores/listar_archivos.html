@@ -3,7 +3,31 @@
 {% block content %}
 <div class="container mt-4">
     <h2 class="text-center">Archivos Excel Subidos</h2>
-    
+    <!-- Formulario de Filtros -->
+    <form method="GET" action="{% url 'listar_archivos' %}" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="obra_social">Obra Social:</label>
+                <input type="text" name="obra_social" id="obra_social" class="form-control" value="{{ obra_social_query }}">
+            </div>
+            <div class="col-md-4">
+                <label for="usuario">Usuario:</label>
+                <input type="text" name="usuario" id="usuario" class="form-control" value="{{ usuario_query }}">
+            </div>
+            <div class="col-md-4">
+                <label for="fecha">Fecha (YYYY-MM-DD):</label>
+                <input type="date" name="fecha" id="fecha" class="form-control" value="{{ fecha_query }}">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+            <a href="{% url 'listar_archivos' %}" class="btn btn-secondary">Limpiar</a>
+            {% if request.user.perfilusuario.tipo_usuario.nombre in "admin facturacion" %}
+            <a href="{% url 'subir_excel' %}" class="btn btn-primary">Carga de Valores Prestacionales </a>
+            {% endif %}
+        </div>
+    </form>
+
     <div class="table-responsive">
         <table class="table table-striped table-hover">
             <thead class="table-dark">
@@ -24,30 +48,94 @@
                         {% if request.user.perfilusuario.tipo_usuario.nombre in "admin facturacion" %}
                         <a href="{{ archivo.archivo.url }}" class="btn btn-info btn-sm" download>
                             <i class="fas fa-download"></i> Descargar
-                        {% endif %}
                         </a>
+                        {% endif %}
                         {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
                         <a href="{% url 'procesar_excel' archivo.id %}" class="btn btn-warning btn-sm">
                             <i class="fas fa-cogs"></i> Procesar
-                        {% endif %}    
                         </a>
-                        {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
                         <a href="{% url 'exportar_valores_procesados' archivo.id %}" class="btn btn-success btn-sm">
                             <i class="fas fa-file-export"></i> Exportar
-                        {% endif %} 
                         </a>
-                        
-                        <!-- Botón para eliminar el archivo con confirmación -->
-                        {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
                         <a href="{% url 'eliminar_archivo_excel' archivo.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este archivo? Esta acción no se puede deshacer.')">
                             <i class="fas fa-trash"></i> Eliminar
-                        {% endif %}     
                         </a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
+    <!-- Paginación -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if request.GET %}&amp;{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&amp;{% endif %}{% endfor %}{% endif %}">Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&amp;{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&amp;{% endif %}{% endfor %}{% endif %}">Anterior</a>
+            {% endif %}
+    
+            <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET %}&amp;{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&amp;{% endif %}{% endfor %}{% endif %}">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET %}&amp;{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&amp;{% endif %}{% endfor %}{% endif %}">Última</a>
+            {% endif %}
+        </span>
+    </div>
 </div>
+
+
+<style>
+    .btn-warning:hover,
+    .btn-warning:focus,
+    .btn-warning:active {
+        background-color: red;
+        border-color: red;
+    }
+    
+    .btn-danger:hover,
+    .btn-danger:focus,
+    .btn-danger:active {
+        background-color: red;
+        border-color: red;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+    }
+    
+    .pagination .step-links {
+        display: flex;
+        gap: 10px;
+        font-size: 16px;
+    }
+    
+    .pagination a {
+        padding: 8px 16px;
+        background-color: #f8f9fa;
+        color: #007bff;
+        text-decoration: none;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+    
+    .pagination a:hover {
+        background-color: #e2e6ea;
+        color: #0056b3;
+    }
+    
+    .pagination span {
+        padding: 8px 16px;
+    }
+    
+    .pagination .step-links a[disabled] {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: #dee2e6;
+    }
+</style>
 {% endblock %}

@@ -527,47 +527,68 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from .models import ArchivoExcel
 from django.contrib import messages
+from .models import ArchivoExcel
 
 @login_required
 @tipo_usuario_requerido('admin')
 def procesar_excel(request, id):
     archivo = get_object_or_404(ArchivoExcel, id=id)
 
+    # Verificar si el archivo ya ha sido procesado
+    if archivo.procesado:
+        messages.warning(request, "Este archivo ya ha sido procesado previamente.")
+        return redirect('listar_archivos')
+
     # Verificar si el archivo es un Excel
     if archivo.archivo.name.endswith('.xlsx'):
         # Leer el archivo Excel usando pandas
         excel_path = archivo.archivo.path
-        xls = pd.ExcelFile(excel_path)
+        try:
+            xls = pd.ExcelFile(excel_path)
+        except Exception as e:
+            messages.error(request, f"Error al abrir el archivo Excel: {e}")
+            return redirect('listar_archivos')
 
-        # Cargar Hoja1 y Hoja2 (ajustado a tu requerimiento)
-        hoja1 = pd.read_excel(xls, sheet_name='Hoja1')
-        hoja2 = pd.read_excel(xls, sheet_name='Hoja2')
+        # Cargar Hoja1 y Hoja2 (o crear Hoja2 si no existe)
+        try:
+            hoja1 = pd.read_excel(xls, sheet_name='Hoja1')
+        except Exception as e:
+            messages.error(request, f"Error al leer 'Hoja1': {e}")
+            return redirect('listar_archivos')
 
-        # Procesamiento: Transferir datos de Hoja1 a Hoja2
+        try:
+            hoja2 = pd.read_excel(xls, sheet_name='Hoja2')
+        except:
+            hoja2 = pd.DataFrame(columns=['coddesde', 'codhasta', 'importe'])
+
+        # Procesar los datos y transferir de Hoja1 a Hoja2
         hoja1.columns = ['Practica', 'Codigo', 'Valor Pactado', 'Propuesta Valores']
         hoja1_clean = hoja1.dropna(subset=['Codigo', 'Propuesta Valores'])
         hoja1_clean['Codigo'] = pd.to_numeric(hoja1_clean['Codigo'], errors='coerce')
-
         hoja2['coddesde'] = pd.to_numeric(hoja2['coddesde'], errors='coerce')
         hoja2['codhasta'] = pd.to_numeric(hoja2['codhasta'], errors='coerce')
 
         for index, row in hoja1_clean.iterrows():
             codigo = row['Codigo']
             propuesta_valor = row['Propuesta Valores']
+            if pd.notnull(codigo):
+                hoja2.loc[(hoja2['coddesde'] <= codigo) & (hoja2['codhasta'] >= codigo), 'importe'] = propuesta_valor
 
-            hoja2.loc[(hoja2['coddesde'] <= codigo) & (hoja2['codhasta'] >= codigo), 'importe'] = propuesta_valor
+        # Guardar los cambios en el archivo
+        try:
+            with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
+                hoja1.to_excel(writer, sheet_name='Hoja1', index=False)
+                hoja2.to_excel(writer, sheet_name='Hoja2', index=False)
+        except Exception as e:
+            messages.error(request, f"Error al guardar el archivo Excel: {e}")
+            return redirect('listar_archivos')
 
-        # Guardar el Excel actualizado en memoria
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = f'attachment; filename=procesado_{archivo.archivo.name}'
-        
-        # Escribir las hojas de nuevo en el archivo de respuesta
-        with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
-            hoja1.to_excel(writer, sheet_name='Hoja1', index=False)
-            hoja2.to_excel(writer, sheet_name='Hoja2', index=False)
+        # Marcar como procesado
+        archivo.procesado = True
+        archivo.save()
 
         messages.success(request, 'El archivo ha sido procesado exitosamente.')
-        return response
+        return redirect('listar_archivos')
     else:
         messages.error(request, 'El archivo no es un archivo Excel válido.')
         return redirect('listar_archivos')
@@ -584,37 +605,27 @@ from io import BytesIO
 def exportar_valores_procesados(request, id):
     archivo = get_object_or_404(ArchivoExcel, id=id)
 
+    # Verificar si el archivo ha sido procesado
+    if not archivo.procesado:
+        messages.error(request, "No puedes exportar los valores procesados porque el archivo no ha sido procesado aún.")
+        return redirect('listar_archivos')
+
     # Verificar si el archivo es un Excel
     if archivo.archivo.name.endswith('.xlsx'):
-        # Leer el archivo Excel
+        # Leer el archivo Excel ya procesado
         excel_path = archivo.archivo.path
-        xls = pd.ExcelFile(excel_path)
-
-        # Cargar Hoja1 y Hoja2
-        hoja1 = pd.read_excel(xls, sheet_name='Hoja1')
-        hoja2 = pd.read_excel(xls, sheet_name='Hoja2')
-
-        # Procesar los datos (como en la vista de procesamiento)
-        hoja1.columns = ['Practica', 'Codigo', 'Valor Pactado', 'Propuesta Valores']
-        hoja1_clean = hoja1.dropna(subset=['Codigo', 'Propuesta Valores'])
-        hoja1_clean['Codigo'] = pd.to_numeric(hoja1_clean['Codigo'], errors='coerce')
-
-        hoja2['coddesde'] = pd.to_numeric(hoja2['coddesde'], errors='coerce')
-        hoja2['codhasta'] = pd.to_numeric(hoja2['codhasta'], errors='coerce')
-
-        for index, row in hoja1_clean.iterrows():
-            codigo = row['Codigo']
-            propuesta_valor = row['Propuesta Valores']
-
-            # Asignar valores en la Hoja2
-            hoja2.loc[(hoja2['coddesde'] <= codigo) & (hoja2['codhasta'] >= codigo), 'importe'] = propuesta_valor
+        try:
+            xls = pd.ExcelFile(excel_path)
+            hoja2 = pd.read_excel(xls, sheet_name='Hoja2')  # Solo necesitamos Hoja2
+        except Exception as e:
+            messages.error(request, f"Error al leer el archivo: {e}")
+            return redirect('listar_archivos')
 
         # Crear un buffer para almacenar el archivo Excel generado
         output = BytesIO()
 
-        # Guardar los cambios en un archivo Excel
+        # Guardar Hoja2 en un archivo Excel
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            hoja1.to_excel(writer, sheet_name='Hoja1', index=False)
             hoja2.to_excel(writer, sheet_name='Hoja2', index=False)
 
         # Obtener el contenido del archivo Excel en memoria
@@ -626,8 +637,8 @@ def exportar_valores_procesados(request, id):
 
         return response
     else:
-        # Si el archivo no es un Excel, se puede redirigir o mostrar un error
-        return HttpResponse("El archivo no es un Excel válido.")
+        messages.error(request, 'El archivo no es un archivo Excel válido.')
+        return redirect('listar_archivos')
 
 #-----------------------FIn proceso de facturacion ---------------------------------------------------------------------------#
 
