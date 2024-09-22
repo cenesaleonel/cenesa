@@ -6,5 +6,8 @@
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Subir Excel</button>
+    <a href="{% url 'descargar_formato_excel' %}" class="btn btn-primary">
+        Descargar Formato Excel
+    </a>
 </form>
 {% endblock %}

@@ -239,12 +239,14 @@ def eliminar_novedad(request, id):
 
 #Comienzo de sector de facturacion.----------------------------------------------------------------#
 @login_required
-@tipo_usuario_requerido('admin','facturacion')
+@tipo_usuario_requerido('admin', 'facturacion')
 def subir_excel(request):
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            archivo = form.save(commit=False)  # No guardes el archivo aún
+            archivo.usuario = request.user  # Asigna el usuario que sube el archivo
+            archivo.save()  # Ahora guarda el archivo con el usuario
             messages.success(request, "Archivo Excel subido correctamente.")
             return redirect('listar_archivos')
     else:
@@ -528,7 +530,6 @@ from django.http import HttpResponse
 from .models import ArchivoExcel
 from django.contrib import messages
 from .models import ArchivoExcel
-
 @login_required
 @tipo_usuario_requerido('admin')
 def procesar_excel(request, id):
@@ -591,7 +592,7 @@ def procesar_excel(request, id):
         return redirect('listar_archivos')
     else:
         messages.error(request, 'El archivo no es un archivo Excel válido.')
-        return redirect('listar_archivos')
+        return redirect('listar_archivos') 
 
 
 
@@ -639,6 +640,27 @@ def exportar_valores_procesados(request, id):
     else:
         messages.error(request, 'El archivo no es un archivo Excel válido.')
         return redirect('listar_archivos')
+    
+    
+    
+@login_required
+@tipo_usuario_requerido('admin', 'facturacion')
+def descargar_formato_excel(request):
+    # Ruta completa al archivo dentro del directorio `media`
+    file_path = os.path.join(settings.MEDIA_ROOT, 'formato_carga_de_valores', 'formato_de_carga.xlsx')
+    
+    # Verificar si el archivo existe antes de enviarlo
+    if os.path.exists(file_path):
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename='formato_de_carga.xlsx')
+    else:
+        # Si el archivo no está disponible, mostrar un mensaje de error y redirigir
+        messages.error(request, "El archivo de formato no se encuentra disponible.")
+        return redirect('listar_archivos') 
+    
+    
+    
+    
+    
 
 #-----------------------FIn proceso de facturacion ---------------------------------------------------------------------------#
 

@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import carga_obra_social_geclisa , carga_obra_social_estandar , exportar_obra_social_estandar
+from .views import carga_obra_social_geclisa , carga_obra_social_estandar , exportar_obra_social_estandar, descargar_formato_excel
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -25,6 +25,7 @@ urlpatterns = [
     path('exportar-valores-procesados/<int:id>/', views.exportar_valores_procesados, name='exportar_valores_procesados'),
     path('procesar-excel/<int:id>/', views.procesar_excel, name='procesar_excel'),
     path('eliminar-archivo/<int:id>/', views.eliminar_archivo_excel, name='eliminar_archivo_excel'),
+    path('descargar-formato/', descargar_formato_excel, name='descargar_formato_excel'),
     
     
     path('obras-sociales/', views.listar_obras_sociales, name='listar_obras_sociales'),
@@ -34,6 +35,7 @@ urlpatterns = [
     path('carga-obra-social-geclisa/', carga_obra_social_geclisa, name='carga_obra_social_geclisa'),
     path('carga-obra-social-estandar/', carga_obra_social_estandar, name='carga_obra_social_estandar'),
     path('exportar-obra-social-estandar/', exportar_obra_social_estandar, name='exportar_obra_social_estandar'),
+    
 
 
     

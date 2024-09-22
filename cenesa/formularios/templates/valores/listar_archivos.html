@@ -34,6 +34,7 @@
                 <tr>
                     <th>Obra Social / ART</th>
                     <th>Archivo</th>
+                    <th>Usuario</th>  <!-- Nueva columna para el nombre del usuario -->
                     <th>Fecha de Carga</th>
                     <th>Acciones</th>
                 </tr>
@@ -43,6 +44,7 @@
                 <tr>
                     <td>{{ archivo.obra_social.nombre }}</td>
                     <td>{{ archivo.archivo.name }}</td>
+                    <td>{% if archivo.usuario %}{{ archivo.usuario.username }}{% else %}Desconocido{% endif %}</td><!-- Mostrar el nombre de usuario -->
                     <td>{{ archivo.fecha_carga|date:"d M Y" }}</td>
                     <td>
                         {% if request.user.perfilusuario.tipo_usuario.nombre in "admin facturacion" %}
@@ -67,6 +69,7 @@
             </tbody>
         </table>
     </div>
+    
 
     <!-- Paginación -->
     <div class="pagination">
