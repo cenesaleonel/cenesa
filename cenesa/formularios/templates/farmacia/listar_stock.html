@@ -93,7 +93,9 @@
 
                     <td>
                         <a href="{% url 'editar_producto' item.codigo %}" class="btn btn-sm btn-warning">Editar</a>
+                        {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
                         <button type="button" class="btn btn-sm btn-danger btn-eliminar" data-codigo="{{ item.codigo }}">Eliminar</button>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -150,6 +152,7 @@
 
 
 <div class="mt-4">
+            {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
     <div class="row">
         <div class="col-md-6">
             <a href="{% url 'volver_stock_a_cero' %}" class="btn btn-warning w-100">
@@ -160,6 +163,7 @@
             <a href="{% url 'eliminar_stock' %}" class="btn btn-danger w-100">
                 Eliminar Todo el Stock
             </a>
+            {% endif %}
         </div>
     </div>
 </div>

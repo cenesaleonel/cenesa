@@ -21,7 +21,7 @@ from django.http import HttpResponseForbidden
 from .models import PerfilUsuario
 
 #@tipo_usuario_requerido('admin', 'editor')# Esto vamos a usar para definir las restricciones. rrhh
-	#Esto son la lista  de tipo de usuarios por ahora: #facturacion #tesoreria #gerencia #personal #framacia #admin
+	#Esto son la lista  de tipo de usuarios por ahora: #facturacion #tesoreria #gerencia #personal #Farmacia #admin
 
 def tipo_usuario_requerido(*tipos_usuarios):
     def decorator(func):
@@ -677,7 +677,7 @@ import pandas as pd
 from django.contrib import messages
 from .models import Stock
 from .forms import UploadStockForm, StockForm
-
+@tipo_usuario_requerido('admin', 'Farmacia')
 @login_required
 def carga_masiva_stock(request):
     if request.method == 'POST':
@@ -731,6 +731,7 @@ def carga_masiva_stock(request):
 
 from django.core.paginator import Paginator
 from django.db.models import Q
+@tipo_usuario_requerido('admin', 'Farmacia')
 @login_required
 def listar_stock(request):
     # Obtener los valores del filtro desde el request GET
@@ -767,6 +768,7 @@ def listar_stock(request):
 
 
 # Vista para agregar un nuevo producto
+@tipo_usuario_requerido('admin', 'Farmacia')
 @login_required
 def agregar_producto(request):
     if request.method == 'POST':
@@ -780,6 +782,7 @@ def agregar_producto(request):
 
 
 # Vista para editar un producto existente
+@tipo_usuario_requerido('admin', 'Farmacia')
 @login_required
 def editar_producto(request, codigo):
     producto = get_object_or_404(Stock, codigo=codigo)
@@ -798,8 +801,8 @@ from django.shortcuts import get_object_or_404
 from .models import Stock
 
 # Vista para eliminar un producto
+@tipo_usuario_requerido('admin', 'Farmacia')
 @login_required
-
 def eliminar_producto(request, codigo):
     if request.method == 'POST':
         producto = get_object_or_404(Stock, codigo=codigo)
@@ -825,6 +828,7 @@ def eliminar_producto(request, codigo):
 import pandas as pd
 from django.http import HttpResponse
 from .models import Stock
+@tipo_usuario_requerido('admin', 'Farmacia')
 @login_required
 def descargar_stock(request):
     # Obtener todos los productos del stock
@@ -854,8 +858,8 @@ def descargar_stock(request):
 
 
 from django.contrib import messages
+@tipo_usuario_requerido('admin')
 @login_required
-
 def volver_stock_a_cero(request):
     if request.method == 'POST':
         # Proceso de validación: preguntar al usuario si está seguro
@@ -868,9 +872,8 @@ def volver_stock_a_cero(request):
             messages.error(request, 'Acción cancelada.')
     
     return render(request, 'farmacia/confirmar_volver_stock_a_cero.html')
-
+@tipo_usuario_requerido('admin')
 @login_required
-
 def eliminar_stock(request):
     if request.method == 'POST':
         # Proceso de validación: preguntar al usuario si está seguro
@@ -892,6 +895,7 @@ from .forms import SubirArchivoExcelForm
 import pandas as pd
 import os
 @login_required
+@tipo_usuario_requerido('admin', 'Farmacia')
 def actualizar_inventario(request):
     if request.method == 'POST':
         form = SubirArchivoExcelForm(request.POST, request.FILES)
@@ -984,6 +988,7 @@ import pandas as pd
 from django.http import HttpResponse
 from .models import Stock  # Asegúrate de tener el modelo correcto para el inventario
 @login_required
+@tipo_usuario_requerido('admin', 'Farmacia')
 def descargar_inventario(request):
     # Obtener todos los productos del inventario
     stock_items = Stock.objects.all()
@@ -1011,6 +1016,7 @@ def descargar_inventario(request):
 
 
 @login_required
+@tipo_usuario_requerido('admin', 'Farmacia')
 def descargar_estructura_excel(request):
     # Crear un DataFrame con la estructura del Excel de importación
     data = {
@@ -1042,6 +1048,7 @@ from reportlab.lib.units import cm
 from django.http import HttpResponse
 from .models import Stock
 @login_required
+@tipo_usuario_requerido('admin', 'Farmacia')
 def descargar_stock_pdf(request):
     # Configurar el archivo PDF de respuesta
     response = HttpResponse(content_type='application/pdf')
@@ -1107,6 +1114,7 @@ from django.core.paginator import Paginator
 from .models import Stock
 
 @login_required
+@tipo_usuario_requerido('admin', 'Farmacia')
 def imprimir_stock(request):
     # Obtener los valores del filtro desde el request GET
     filtro_codigo = request.GET.get('codigo', '')
@@ -1154,6 +1162,7 @@ from .models import Stock
 
 # Función para modificar el stock
 @login_required
+@tipo_usuario_requerido('admin', 'Farmacia')
 def modificar_stock(request, codigo):
     if request.method == 'POST':
         item = get_object_or_404(Stock, codigo=codigo)
@@ -1200,6 +1209,7 @@ def modificar_stock(request, codigo):
 
 
 @login_required
+@tipo_usuario_requerido('admin', 'Farmacia')
 def carga_formato_geclisa(request):
     if request.method == 'POST':
         form = UploadStockForm(request.POST, request.FILES)

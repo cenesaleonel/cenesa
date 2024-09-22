@@ -42,10 +42,9 @@
                             {% endif %}
                         </li>
                         <li class="nav-item">
-                            {% if request.user.perfilusuario.tipo_usuario.nombre in "admin farmacia" %}
+                            {% if request.user.perfilusuario.tipo_usuario.nombre in "admin Farmacia" %}
                             <a class="nav-link" href="{% url 'listar_stock' %}">Farmacia</a>
                             {% endif %}
-                        
                         </li>
                         
 
