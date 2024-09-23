@@ -5,7 +5,33 @@
 {% block content %}
     <div class="container mt-4">
         <h1>Pedidos de Autorización</h1>
-        {% if pedidos %}
+
+        <!-- Formulario de Filtros -->
+        <form method="GET" action="{% url 'listar_pedidos_autorizacion' %}" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    {% if request.user.perfilusuario.tipo_usuario.nombre in "admin rrhh" %}
+                    <label for="q">Buscar por solicitante:</label>
+                    <input type="text" name="q" id="q" value="{{ query }}" class="form-control">
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label for="estado">Estado:</label>
+                    <select name="estado" id="estado" class="form-control">
+                        <option value="">Todos</option>
+                        <option value="pendiente" {% if estado == "pendiente" %}selected{% endif %}>Pendiente</option>
+                        <option value="aprobada" {% if estado == "aprobada" %}selected{% endif %}>Aprobado</option>
+                        <option value="rechazado" {% if estado == "rechazado" %}selected{% endif %}>Rechazado</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="{% url 'listar_pedidos_autorizacion' %}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </div>
+        </form>
+
+        {% if page_obj %}
         <table class="table">
             <thead>
                 <tr>
@@ -16,7 +42,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for pedido in pedidos %}
+                {% for pedido in page_obj %}
                 <tr>
                     <td>{{ pedido.nombre_solicitante }}</td>
                     <td>{{ pedido.fecha_solicitud|date:"d M Y" }}</td>
@@ -30,12 +56,11 @@
                         <a href="{% url 'rechazar_pedido_autorizacion' pedido.id %}" class="btn btn-danger">Rechazar</a>
                         {% endif %}
 
-                        
                         {% if request.user.perfilusuario.tipo_usuario.nombre in "admin rrhh" %}
-                        <a href="{% url 'eliminar_pedido_autorizacion' pedido.id %}" class="btn btn-warning" 
+                        <a href="{% url 'eliminar_pedido_autorizacion' pedido.id %}" class="btn btn-warning"
                         onclick="return confirm('¿Estás seguro de que deseas eliminar esta solicitud? Esta acción no se puede deshacer.')">Eliminar</a>
-                        {% elif  pedido.estado == 'pendiente' and request.user == pedido.usuario %}
-                        <a href="{% url 'eliminar_pedido_autorizacion' pedido.id %}" class="btn btn-warning" 
+                        {% elif pedido.estado == 'pendiente' and request.user == pedido.usuario %}
+                        <a href="{% url 'eliminar_pedido_autorizacion' pedido.id %}" class="btn btn-warning"
                         onclick="return confirm('¿Estás seguro de que deseas eliminar esta solicitud? Esta acción no se puede deshacer.')">Eliminar</a>
                         {% endif %}
                     </td>
@@ -43,6 +68,26 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- Paginación -->
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1&q={{ query }}&estado={{ estado }}">Primera</a>
+                    <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&estado={{ estado }}">Anterior</a>
+                {% endif %}
+
+                <span class="current">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&estado={{ estado }}">Siguiente</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}&q={{ query }}&estado={{ estado }}">Última</a>
+                {% endif %}
+            </span>
+        </div>
+
         {% else %}
         <div class="alert alert-warning">No hay pedidos de autorización.</div>
         {% endif %}

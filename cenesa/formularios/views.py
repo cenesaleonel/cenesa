@@ -139,22 +139,34 @@ def subir_pdf_rellenado(request):
         form = PedidoAutorizacionForm()
     return render(request, 'solicitar/subir_pdf_rellenado.html', {'form': form})
 
-
+from django.core.paginator import Paginator
+from django.db.models import Q
 @login_required
 def listar_pedidos_autorizacion(request):
-    # Obtener el perfil del usuario para verificar su tipo
     perfil_usuario = PerfilUsuario.objects.filter(usuario=request.user).first()
-    
-    # Verificar si el usuario es admin o rrhh
     es_admin_o_rrhh = perfil_usuario and perfil_usuario.tipo_usuario.nombre in ['admin', 'rrhh']
-
-    # Si es admin o rrhh, mostrar todos los pedidos, de lo contrario, solo los del usuario actual
+    query = request.GET.get('q', '')
+    estado = request.GET.get('estado', '')
     if es_admin_o_rrhh:
-        pedidos = PedidoAutorizacion.objects.all()  # Mostrar todos los pedidos
+        pedidos = PedidoAutorizacion.objects.all()
     else:
-        pedidos = PedidoAutorizacion.objects.filter(usuario=request.user)  # Mostrar solo los pedidos del usuario actual
+        pedidos = PedidoAutorizacion.objects.filter(usuario=request.user)
+    if query:
+        pedidos = pedidos.filter(Q(nombre_solicitante__icontains=query))
+    if estado:
+        pedidos = pedidos.filter(estado=estado)
 
-    return render(request, 'solicitar/listar_pedidos_autorizacion.html', {'pedidos': pedidos})
+    
+    paginator = Paginator(pedidos, 10)  
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'solicitar/listar_pedidos_autorizacion.html', {
+        'page_obj': page_obj,
+        'query': query,
+        'estado': estado,
+    })
+
 
 
 @login_required
