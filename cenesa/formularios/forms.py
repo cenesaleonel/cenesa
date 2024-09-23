@@ -92,13 +92,14 @@ class UploadStockForm(forms.Form):
 class StockForm(forms.ModelForm):
     class Meta:
         model = Stock
-        fields = ['codigo', 'descripcion', 'deposito', 'tipo_elemento', 'cantidad']
+        fields = ['codigo', 'descripcion', 'deposito', 'tipo_elemento', 'cantidad', 'stock_minimo']  
         widgets = {
             'codigo': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
             'deposito': forms.TextInput(attrs={'class': 'form-control'}),
             'tipo_elemento': forms.TextInput(attrs={'class': 'form-control'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
+            'stock_minimo': forms.NumberInput(attrs={'class': 'form-control'}),  
         }
     
     

@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import carga_obra_social_geclisa , carga_obra_social_estandar , exportar_obra_social_estandar, descargar_formato_excel
+from .views import carga_obra_social_geclisa , carga_obra_social_estandar , exportar_obra_social_estandar, descargar_formato_excel, modificar_stock_minimo
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -55,4 +55,5 @@ urlpatterns = [
     path('descargar-stock-pdf/', views.descargar_stock_pdf, name='descargar_stock_pdf'),
     path('eliminar-producto/<str:codigo>/', views.eliminar_producto, name='eliminar_producto'),
     path('imprimir-stock/', views.imprimir_stock, name='imprimir_stock'),
+    path('modificar-stock-minimo/<str:codigo>/', views.modificar_stock_minimo, name='modificar_stock_minimo'),
 ]

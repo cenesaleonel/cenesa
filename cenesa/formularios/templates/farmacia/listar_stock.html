@@ -27,7 +27,7 @@
             </ul>
         </div>
     </div>
-
+<button id="toggle-minimo" class="btn btn-secondary mt-0">Modificar Stock Mínimo</button>
 <div class="btn-group">
     <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
         Imprimir
@@ -36,6 +36,10 @@
         <li><a class="dropdown-item" href="{% url 'imprimir_stock' %}?codigo={{ filtro_codigo }}&descripcion={{ filtro_descripcion }}&deposito={{ filtro_deposito }}&tipo={{ filtro_tipo }}">Imprimir Stock Filtrado</a></li>
     </ul>
 </div>
+
+
+
+
 
 
     <!-- Formulario de filtrado -->
@@ -57,7 +61,7 @@
             <a href="{% url 'listar_stock' %}" class="btn btn-secondary">Limpiar</a>
         </div>
     </form>
-
+    
     <!-- Tabla de stock -->
     <div class="table-responsive">
         <table class="table-excel">
@@ -70,6 +74,7 @@
                     <th scope="col">Cantidad</th>
                     <th scope="col">Operación</th> 
                     <th scope="col">Acciones</th>
+                    <th scope="col" class="columna-minimo" style="display:none;">Stock Mínimo</th>
                 </tr>
             </thead>
             <tbody>
@@ -97,12 +102,19 @@
                         <button type="button" class="btn btn-sm btn-danger btn-eliminar" data-codigo="{{ item.codigo }}">Eliminar</button>
                         {% endif %}
                     </td>
+                    <td class="columna-minimo" style="display:none;">
+                        <form id="form-minimo-{{ item.codigo }}" class="form-minimo">
+                            {% csrf_token %}
+                            <input type="number" name="stock_minimo" class="form-control" value="{{ item.stock_minimo }}" min="1">
+                        </form>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
 
 
 <!-- Modal para confirmar eliminación -->
@@ -149,7 +161,17 @@
         {% endif %}
     </span>
 </div>
-
+<!-- Alertas de stock mínimo -->
+{% if stock_alertas %}
+<div class="alert alert-danger">
+    <strong>Atención!</strong> Los siguientes productos tienen un stock menor al mínimo:
+    <ul>
+        {% for item in stock_alertas %}
+        <li>{{ item.descripcion }} (Código: {{ item.codigo }}) - Stock: {{ item.cantidad }} / Mínimo: {{ item.stock_minimo }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
 
 <div class="mt-4">
             {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
@@ -274,6 +296,47 @@ document.getElementById('confirmar-eliminar').addEventListener('click', () => {
     }
 });
 
+// Mostrar y ocultar la columna de stock mínimo
+document.getElementById('toggle-minimo').addEventListener('click', function() {
+    const columnasMinimo = document.querySelectorAll('.columna-minimo');
+    columnasMinimo.forEach(columna => {
+        if (columna.style.display === 'none') {
+            columna.style.display = '';
+        } else {
+            columna.style.display = 'none';
+        }
+    });
+});
+
+// Cambiar stock mínimo
+document.querySelectorAll('.form-minimo input[name="stock_minimo"]').forEach(input => {
+    input.addEventListener('change', function() {
+        const codigo = this.closest('form').id.split('-')[2]; // Obtener el código del producto
+        const formData = new FormData(document.getElementById(`form-minimo-${codigo}`));
+
+        fetch(`/modificar-stock-minimo/${codigo}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('mensaje-texto').innerText = data.mensaje;
+                new bootstrap.Modal(document.getElementById('mensaje-modal')).show();
+            } else {
+                document.getElementById('mensaje-texto').innerText = data.error;
+                new bootstrap.Modal(document.getElementById('mensaje-modal')).show();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+
 </script>
     
 
@@ -359,7 +422,10 @@ document.getElementById('confirmar-eliminar').addEventListener('click', () => {
     pointer-events: none;
     background-color: #dee2e6;
 }
-
+.align-buttons {
+    margin-top: 0; /* Asegúrate de que no haya margen en la parte superior */
+    vertical-align: top; /* Esto alinea el botón con los otros en la parte superior */
+}
    
 </style>
 

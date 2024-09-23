@@ -111,6 +111,7 @@ class Stock(models.Model):
     deposito = models.CharField(max_length=255)
     tipo_elemento = models.CharField(max_length=255)
     cantidad = models.DecimalField(max_digits=10, decimal_places=0)
+    stock_minimo = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.descripcion} ({self.cantidad})"

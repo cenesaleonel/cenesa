@@ -777,6 +777,12 @@ def listar_stock(request):
         stock_items = stock_items.filter(deposito__icontains=filtro_deposito)
     if filtro_tipo:
         stock_items = stock_items.filter(tipo_elemento__icontains=filtro_tipo)
+
+    # Verificar si algún producto tiene stock por debajo del mínimo y generar alerta
+    for item in stock_items:
+        if item.cantidad < item.stock_minimo:
+            messages.warning(request, f"El stock de {item.descripcion} está por debajo del mínimo. ({item.cantidad} disponibles, mínimo {item.stock_minimo})")
+
     # Paginación: mostrar 20 elementos por página
     paginator = Paginator(stock_items, 20)  # 20 elementos por página
     page_number = request.GET.get('page')  # Obtener el número de página de la solicitud GET
@@ -1284,3 +1290,26 @@ def carga_formato_geclisa(request):
     else:
         form = UploadStockForm()
     return render(request, 'farmacia/carga_formato_geclisa.html', {'form': form})
+
+@login_required
+@tipo_usuario_requerido('admin', 'Farmacia')
+def modificar_stock_minimo(request, codigo):
+    if request.method == 'POST':
+        try:
+            item = Stock.objects.get(codigo=codigo)
+            stock_minimo = request.POST.get('stock_minimo')
+            
+            if stock_minimo and int(stock_minimo) >= 0:
+                item.stock_minimo = int(stock_minimo)
+                item.save()
+
+                return JsonResponse({
+                    'success': True,
+                    'mensaje': f'Stock mínimo para el producto {item.descripcion} actualizado a {stock_minimo}.'
+                })
+            else:
+                return JsonResponse({'success': False, 'error': 'El valor del stock mínimo no es válido.'}, status=400)
+        except Stock.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Producto no encontrado.'}, status=404)
+    else:
+        return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
