@@ -43,8 +43,8 @@
   
 
     <!-- Tabla de resultados -->
-    <table class="table table-striped">
-        <thead>
+    <table class="table table-bordered table-hover table-striped text-center">
+        <thead class="table-dark">
             <tr>
                 <th>Nombre</th>
                 <th>Código</th>
@@ -57,15 +57,22 @@
                 <td>{{ obra_social.nombre }}</td>
                 <td>{{ obra_social.codigo }}</td>
                 <td>
-                    <a href="{% url 'editar_obra_social' obra_social.id %}" class="btn btn-primary">Editar</a>
+                    <a href="{% url 'editar_obra_social' obra_social.id %}" class="btn btn-primary btn-sm">Editar</a>
                     {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
-                    <a href="{% url 'eliminar_obra_social' obra_social.id %}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta obra social?')">Eliminar</a>
+                    <a href="{% url 'eliminar_obra_social' obra_social.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta obra social?')">Eliminar</a>
                     {% endif %} 
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        {% if request.user.perfilusuario.tipo_usuario.nombre in "admin" %}
+        <a href="{% url 'vaciar_obras_sociales' %}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar todas las obras sociales? Esta acción no se puede deshacer.')">
+            <i class="fas fa-trash"></i> Vaciar Obras Sociales
+        </a>
+        {% endif %} 
+    </div>
 
     <!-- Paginación -->
     <div class="pagination">
@@ -132,6 +139,47 @@
         color: #6c757d;
         pointer-events: none;
         background-color: #dee2e6;
+    }
+    .table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        font-size: 1rem;
+    }
+    
+    .table th, .table td {
+        padding: 12px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    .table th {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 0.875rem;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-primary:hover, .btn-danger:hover {
+        opacity: 0.9;
     }
 </style>
 

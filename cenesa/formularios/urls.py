@@ -35,6 +35,7 @@ urlpatterns = [
     path('carga-obra-social-geclisa/', carga_obra_social_geclisa, name='carga_obra_social_geclisa'),
     path('carga-obra-social-estandar/', carga_obra_social_estandar, name='carga_obra_social_estandar'),
     path('exportar-obra-social-estandar/', exportar_obra_social_estandar, name='exportar_obra_social_estandar'),
+    path('vaciar-obras-sociales/', views.vaciar_obras_sociales, name='vaciar_obras_sociales'),
     
 
 

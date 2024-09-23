@@ -335,10 +335,9 @@ def eliminar_archivo_excel(request, id):
     
     return redirect('listar_archivos')
 
-#obra social
 
 
-
+#obra social------------------------------------------------------------------------------------------------
 from django.core.paginator import Paginator
 from django.contrib import messages
 @login_required
@@ -537,7 +536,18 @@ def exportar_obra_social_estandar(request):
 
     return response
 
+@login_required
+@tipo_usuario_requerido('admin')
+def vaciar_obras_sociales(request):
+    if request.method == 'POST':
+        # Borrar todas las obras sociales
+        ObraSocial.objects.all().delete()
+        messages.success(request, "Todas las obras sociales han sido eliminadas correctamente.")
+        return redirect('listar_obras_sociales')
+    
+    return render(request, 'Valores/obra_social/vaciar_obras_sociales.html')
 
+#-------------------------------------------------------------------------------------------------
 
 
 import pandas as pd

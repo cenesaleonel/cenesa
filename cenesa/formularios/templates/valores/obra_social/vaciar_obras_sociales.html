@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">¿Estás seguro de que deseas eliminar todas las obras sociales?</h2>
+    <p class="text-center text-danger">Esta acción no se puede deshacer.</p>
+
+    <div class="d-flex justify-content-center">
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Vaciar Obras Sociales</button>
+            <a href="{% url 'listar_obras_sociales' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
