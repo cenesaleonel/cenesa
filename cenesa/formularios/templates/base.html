@@ -28,13 +28,7 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
-                        <!-- Mostrar solo si el usuario es staff o superusuario -->
                         
-                        <li class="nav-item">
-                            {% if request.user.is_staff and request.user.is_superuser  %}
-                                <a class="nav-link" href="/admin/">Administración</a>
-                            {% endif %}
-                        </li>
                         
                         <li class="nav-item">
                             {% if request.user.perfilusuario.tipo_usuario.nombre in "admin rrhh" %}
@@ -52,7 +46,7 @@
                         <li class="nav-item dropdown">
                             {% if request.user.perfilusuario.tipo_usuario.nombre in "admin rrhh" %}
                             <a class="nav-link dropdown-toggle" href="#" id="formulariosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Formularios
+                                Autorizaciones
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="formulariosDropdown">
                                 <li><a class="dropdown-item" href="{% url 'listar_pedidos_autorizacion' %}">Autorizaciones</a></li>
@@ -77,6 +71,21 @@
                             </ul>
                         </li>
                     </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="configuracionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Configuración
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="configuracionDropdown">
+                                <!-- Menú de Administración -->
+                                <li>
+                                    {% if request.user.is_staff and request.user.is_superuser %}
+                                        <a class="dropdown-item" href="/admin/">Administración</a>
+                                    {% endif %}
+                                </li>
+                                <!-- Aquí puedes agregar más opciones de configuración si lo deseas -->
+                            </ul>
+                        </li>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'logout' %}">Cerrar Sesión</a>
