@@ -13,7 +13,7 @@
             </a>
         </div>
 
-        {% if formularios %}
+        {% if page_obj %}
         <div class="table-responsive">
             <table class="table table-hover table-bordered">
                 <thead class="table-dark">
@@ -25,23 +25,40 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for formulario in formularios %}
+                    {% for formulario in page_obj %}
                     <tr>
                         <td>{{ formulario.nombre }}</td>
                         <td>{{ formulario.descripcion }}</td>
                         <td>{{ formulario.fecha_creacion|date:"d M Y" }}</td>
                         <td class="text-center">
-                            
                             <a href="{{ formulario.pdf.url }}" target="_blank" class="btn btn-info btn-sm">
                                 <i class="fas fa-eye"></i> Ver PDF
                             </a>
-                            
                             <a href="{% url 'eliminar_formulario' formulario.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este formulario? Esta acción no se puede deshacer.')"><i class="fas fa-trash"></i> Eliminar</a>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">Primera</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                {% endif %}
+
+                <span class="current">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+                {% endif %}
+            </span>
         </div>
         {% else %}
         <div class="alert alert-warning text-center">

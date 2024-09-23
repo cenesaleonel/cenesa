@@ -79,7 +79,11 @@ def crear_formulario(request):
 @login_required
 def listar_formularios(request):
     formularios = Formulario.objects.all()
-    return render(request, 'formularios/listar_formularios.html', {'formularios': formularios})
+    paginator = Paginator(formularios, 10)  
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'formularios/listar_formularios.html', {'page_obj': page_obj})
+
 
 @login_required
 def ver_formulario(request, id):
