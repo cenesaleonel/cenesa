@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-5">
@@ -64,8 +65,8 @@
     
     <!-- Tabla de stock -->
     <div class="table-responsive">
-        <table class="table-excel">
-            <thead>
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
                 <tr>
                     <th scope="col">Código</th>
                     <th scope="col">Descripción</th>

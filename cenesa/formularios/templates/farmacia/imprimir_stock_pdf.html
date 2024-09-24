@@ -7,70 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Filtrado - PDF</title>
     {% load static %}
-    <style>
-        /* Estilos personalizados para la versión PDF */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #000;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid black;
-        }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        td {
-            padding: 8px;
-            text-align: left;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tr:nth-child(odd) {
-            background-color: #ffffff;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        /* Puedes agregar una imagen si lo necesitas */
-        .header-image {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .header-image img {
-            width: 150px;
-            height: auto;
-        }
-
-    </style>
 </head>
 <body>
-
-    <div class="header-image">
-        <img src="{% static 'images/logoNV.jpg' %}" alt="Logo">
-    </div>
-
     <h1>Listado de estock</h1>
 
     <table>

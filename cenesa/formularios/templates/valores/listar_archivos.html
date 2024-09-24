@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 <div class="container mt-4">
     <h2 class="text-center">Archivos Excel Subidos</h2>
@@ -88,57 +88,4 @@
         </span>
     </div>
 </div>
-
-
-<style>
-    .btn-warning:hover,
-    .btn-warning:focus,
-    .btn-warning:active {
-        background-color: red;
-        border-color: red;
-    }
-    
-    .btn-danger:hover,
-    .btn-danger:focus,
-    .btn-danger:active {
-        background-color: red;
-        border-color: red;
-    }
-    
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin: 20px 0;
-    }
-    
-    .pagination .step-links {
-        display: flex;
-        gap: 10px;
-        font-size: 16px;
-    }
-    
-    .pagination a {
-        padding: 8px 16px;
-        background-color: #f8f9fa;
-        color: #007bff;
-        text-decoration: none;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-    }
-    
-    .pagination a:hover {
-        background-color: #e2e6ea;
-        color: #0056b3;
-    }
-    
-    .pagination span {
-        padding: 8px 16px;
-    }
-    
-    .pagination .step-links a[disabled] {
-        color: #6c757d;
-        pointer-events: none;
-        background-color: #dee2e6;
-    }
-</style>
 {% endblock %}

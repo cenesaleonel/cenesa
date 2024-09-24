@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 <div class="container mt-5">
     <h2>Obras Sociales Y ART</h2>
@@ -90,97 +90,6 @@
             {% endif %}
         </span>
     </div>
-<style>
-    .btn-warning:hover,
-    .btn-warning:focus,
-    .btn-warning:active {
-        background-color: red;
-        border-color: red;
-    }
-    
-    .btn-danger:hover,
-    .btn-danger:focus,
-    .btn-danger:active {
-        background-color: red;
-        border-color: red;
-    }
-    
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin: 20px 0;
-    }
-    
-    .pagination .step-links {
-        display: flex;
-        gap: 10px;
-        font-size: 16px;
-    }
-    
-    .pagination a {
-        padding: 8px 16px;
-        background-color: #f8f9fa;
-        color: #007bff;
-        text-decoration: none;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-    }
-    
-    .pagination a:hover {
-        background-color: #e2e6ea;
-        color: #0056b3;
-    }
-    
-    .pagination span {
-        padding: 8px 16px;
-    }
-    
-    .pagination .step-links a[disabled] {
-        color: #6c757d;
-        pointer-events: none;
-        background-color: #dee2e6;
-    }
-    .table {
-        border-collapse: collapse;
-        width: 100%;
-        margin: 20px 0;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        font-size: 1rem;
-    }
-    
-    .table th, .table td {
-        padding: 12px;
-        text-align: center;
-        border: 1px solid #ddd;
-    }
 
-    .table th {
-        background-color: #007bff;
-        color: white;
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: #f1f1f1;
-    }
-
-    .btn-sm {
-        padding: 5px 10px;
-        font-size: 0.875rem;
-    }
-    
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-    }
-
-    .btn-primary:hover, .btn-danger:hover {
-        opacity: 0.9;
-    }
-</style>
 
 {% endblock %}
